@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜尋機構 - 托育資訊整合平台</title>
+    <!-- 引入我們寫好的精緻版 CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- 1. 頂部導覽列 (Navbar)                         -->
+    <!-- ========================================== -->
+    <header class="navbar">
+        <a href="index.html" style="text-decoration: none;">
+            <div class="logo-placeholder">托育整合平台 Logo</div>
+        </a>
+        <div class="nav-actions">
+            <!-- 根據需求，這裡放會員中心或登入的連結 -->
+            <a href="login.html" class="wireframe-btn" style="text-decoration: none;">家長登入</a>
+            <a href="user-dashboard.html" class="wireframe-btn primary" style="text-decoration: none;">我的會員區</a>
+        </div>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- 2. 主要搜尋頁面內容 (Search Page Main)          -->
+    <!-- ========================================== -->
+    <main id="search-page">
+        <!-- 頂部：搜尋摘要與關鍵字快搜 -->
+        <div class="search-header">
+            <div class="search-summary">
+                <h2>尋找適合的托育機構</h2>
+                <p class="text-line">透過左側面板設定您的篩選條件，我們會為您即時更新結果。</p>
+            </div>
+            <div class="quick-search">
+                <input type="text" id="keyword-search" class="wireframe-input" placeholder="輸入機構名稱關鍵字...">
+                <button class="wireframe-btn primary">搜尋</button>
+            </div>
+        </div>
+
+        <div class="search-layout">
+            <!-- 左側：進階篩選器 -->
+            <aside class="filter-sidebar">
+                <h3 class="filter-title">進階篩選</h3>
+                
+                <div class="filter-group">
+                 <label class="filter-label" for="filter-district">所在地區</label>
+                 <select id="filter-district" class="wireframe-input full-width">
+                    <!-- 預設選項 -->
+                    <option value="不限">全台北市 (不限地區)</option>
+        
+                    <!-- 台北市 12 個行政區 -->
+                    <option value="內湖區">內湖區</option>
+                    <option value="大安區">大安區</option>
+                    <option value="信義區">信義區</option>
+                    <option value="中山區">中山區</option>
+                    <option value="松山區">松山區</option>
+                    <option value="中正區">中正區</option>
+                    <option value="萬華區">萬華區</option>
+                    <option value="大同區">大同區</option>
+                    <option value="南港區">南港區</option>
+                    <option value="文山區">文山區</option>
+                    <option value="士林區">士林區</option>
+                    <option value="北投區">北投區</option>
+                  </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label" for="filter-fee">最高月費預算</label>
+                    <!-- 範圍拉桿，並顯示當前數值 -->
+                    <input type="range" id="filter-fee" class="range-slider full-width" min="10000" max="40000" step="1000" value="25000" oninput="document.getElementById('fee-display').innerText = this.value + ' 元'">
+                    <div class="range-display">目前設定：<span id="fee-display">25000 元</span> 以下</div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">服務需求 (可複選)</label>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="filter-accepting">
+                        <span class="checkmark"></span>
+                        目前開放招生
+                    </label>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="filter-extended">
+                        <span class="checkmark"></span>
+                        提供延托服務
+                    </label>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label" for="filter-grade">最低評鑑等級</label>
+                    <select id="filter-grade" class="wireframe-input full-width">
+                        <option value="不限">不限等級</option>
+                        <option value="優等">優等以上</option>
+                        <option value="甲等">甲等以上</option>
+                    </select>
+                </div>
+
+                <button id="applyFilterBtn" class="wireframe-btn primary full-width">套用篩選條件</button>
+                <button id="resetFilterBtn" class="wireframe-btn full-width" style="margin-top: 10px;">清除條件</button>
+            </aside>
+
+            <!-- 右側：搜尋結果列表 -->
+            <section class="results-container">
+                <div class="results-meta">
+                    <span>找到 <strong id="result-count">0</strong> 間符合條件的機構</span>
+                    <select class="wireframe-input" style="padding: 6px 12px;">
+                        <option>預設排序</option>
+                        <option>月費由低到高</option>
+                        <option>評價由高到低</option>
+                    </select>
+                </div>
+
+                <!-- 這裡是你 JS 會把 Supabase 資料塞進來的地方 -->
+                <div id="results-list" class="results-list">
+                    <!-- 預設顯示的空狀態 -->
+                    <div class="empty-state">
+                        請點選左側「套用篩選條件」來載入機構資料。
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- 3. 載入 JavaScript 與 Supabase 邏輯             -->
+    <!-- ========================================== -->
+    <!-- 引入 Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 引入你寫好的搜尋邏輯 (確保你把這個檔案也上傳到同一個資料夾) -->
+    <script src="search.js"></script>
+</body>
+</html>

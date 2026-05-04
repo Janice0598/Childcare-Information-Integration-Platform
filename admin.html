@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>托育資訊整合平台 - 管理員後台</title>
+    <style>
+        /* 基礎重置與灰階設定 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* 後台整體佈局 (Flexbox 雙欄) */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 左側導覽列 (Sidebar) */
+        .sidebar {
+            width: 250px;
+            background-color: #333;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 1px solid #555;
+            text-align: center;
+            background-color: #222;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .sidebar-menu li {
+            padding: 15px 20px;
+            border-bottom: 1px solid #444;
+            cursor: pointer;
+            color: #ccc;
+        }
+
+        .sidebar-menu li:hover, .sidebar-menu li.active {
+            background-color: #555;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid #555;
+            text-align: center;
+        }
+
+        /* 右側主內容區 */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 頂部 Header */
+        .top-header {
+            height: 60px;
+            background-color: #fff;
+            border-bottom: 2px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+        /* 內容區塊 */
+        .dashboard-content {
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* 數據儀表板卡片 (CSS Grid) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: #fff;
+            border: 2px solid #ccc;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #555;
+        }
+
+        /* 快速操作與近期活動區塊 */
+        .dashboard-panels {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: #fff;
+            border: 2px solid #ccc;
+            padding: 20px;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        /* 共用按鈕與清單樣式 */
+        .wireframe-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #666;
+            background-color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+
+        .wireframe-btn.primary {
+            background-color: #666;
+            color: #fff;
+        }
+
+        .data-list {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-list th, .data-list td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-list th {
+            background-color: #f9f9f9;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-layout">
+        <!-- 左側導覽列 (Sidebar) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">管理員後台</div>
+            <ul class="sidebar-menu">
+                <li class="active">📊 儀表板首頁</li>
+                <li>🏢 基本資料管理</li>
+                <li>👥 教職員管理</li>
+                <li>🖼️ 設施照片管理</li>
+                <li>🍽️ 每月菜單上傳</li>
+                <li>📝 招生狀態更新</li>
+                <li>🏅 評鑑紀錄管理</li>
+            </ul>
+            <div class="sidebar-footer">
+                <button class="wireframe-btn">登出系統</button>
+            </div>
+        </aside>
+
+        <!-- 右側主內容區 -->
+        <main class="main-content">
+            <!-- 頂部資訊列 -->
+            <header class="top-header">
+                <!-- 加上 id="admin-center-display" -->
+                <div id="admin-center-display">目前管理機構：<strong>載入中...</strong></div>
+                <!-- 加上 id="admin-name-display" -->
+                <div id="admin-name-display">👤 載入中... 您好</div>
+            </header>
+
+            <!-- 儀表板主要內容 -->
+            <div class="dashboard-content">
+                <h1 class="page-title">機構營運概況</h1>
+
+                <!-- 頂部數據卡片 (對應文件中的可更新狀態) -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div>開放招生名額</div>
+                        <div class="stat-value">5</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>目前候補人數</div>
+                        <div class="stat-value">12</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>現職教職員數</div>
+                        <div class="stat-value">8</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>最新評鑑等級</div>
+                        <div class="stat-value">優等</div>
+                    </div>
+                </div>
+
+                <!-- 下方區塊：快速操作 & 近期資料狀態 -->
+                <div class="dashboard-panels">
+                    
+                    <!-- 左欄：快速操作快捷鍵 -->
+                    <div class="panel">
+                        <h2 class="panel-title">快速操作 (Quick Actions)</h2>
+                        <button class="wireframe-btn primary">更新招生與候補狀態</button>
+                        <button class="wireframe-btn">上傳本月新菜單</button>
+                        <button class="wireframe-btn">新增教職員資料</button>
+                        <button class="wireframe-btn">新增設施照片</button>
+                    </div>
+
+                    <!-- 右欄：近期上傳/更新紀錄 -->
+                    <div class="panel">
+                        <h2 class="panel-title">資料維護狀態</h2>
+                        <table class="data-list">
+                            <thead>
+                                <tr>
+                                    <th>資料類型</th>
+                                    <th>最後更新時間</th>
+                                    <th>狀態</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>基本資料 (Basic Info)</td>
+                                    <td>2026-04-15</td>
+                                    <td>✅ 完整</td>
+                                    <td><button>編輯</button></td>
+                                </tr>
+                                <tr>
+                                    <td>每月菜單 (Monthly Menu)</td>
+                                    <td>2026-05-01</td>
+                                    <td>✅ 已上傳</td>
+                                    <td><button>編輯</button></td>
+                                </tr>
+                                <tr>
+                                    <td>招生狀態 (Enrollment)</td>
+                                    <td>2026-04-28</td>
+                                    <td>⚠️ 開放中</td>
+                                    <td><button>更新</button></td>
+                                </tr>
+                                <tr>
+                                    <td>政府評鑑 (Evaluation)</td>
+                                    <td>2025-11-20</td>
+                                    <td>✅ 已建檔</td>
+                                    <td><button>編輯</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+    
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin.js"></script>
+</body>
+</html>
