@@ -1,8 +1,6 @@
 // search.js
 
-const SUPABASE_URL = 'https://rfzavcliggzlpkqqcrzr.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const API_BASE = 'http://localhost:3000/api';
 
 // 套用篩選條件
 document.getElementById('applyFilterBtn').addEventListener('click', async function () {
@@ -16,40 +14,50 @@ document.getElementById('applyFilterBtn').addEventListener('click', async functi
     const capacity  = document.getElementById('filter-capacity').value;
 
     try {
-        let query = supabaseClient.from('childcare_center').select('*');
+        // 建立 query string，只把「有選擇」的條件加進去
+        const params = new URLSearchParams();
+        if (category  !== '不限') params.append('category', category);
+        if (operation !== '不限') params.append('type', operation);
+        if (district  !== '不限') params.append('district', district);
+        if (ratio     !== '不限') params.append('ratio', ratio);
+        if (capacity  !== '不限') params.append('range', capacity);
+        if (openTime  !== '不限') params.append('open_time', openTime);
+        if (closeTime !== '不限') params.append('close_time', closeTime);
 
-        if (category  !== '不限') query = query.eq('category', category);
-        if (operation !== '不限') query = query.eq('operation_type', operation);
-        if (district  !== '不限') query = query.eq('district', district);
-
-        // 師生比：資料庫是 double precision，例如 3.0 代表 1:3
-        if (ratio !== '不限') {
-            const ratioNum = parseFloat(ratio.replace('1:', ''));
-            query = query.eq('teacher_student_ratio', ratioNum);
+        // 決定要打哪支 API
+        let url;
+        if (params.toString() === '') {
+            // 沒有任何篩選條件，就抓全部
+            url = `${API_BASE}/childcare-centers`;
+        } else if (openTime !== '不限' && closeTime !== '不限') {
+            // 有時間篩選，用時間 API
+            url = `${API_BASE}/childcare-centers/search/time?${params}`;
+        } else if (category !== '不限') {
+            url = `${API_BASE}/childcare-centers/search/category?${params}`;
+        } else if (operation !== '不限') {
+            url = `${API_BASE}/childcare-centers/search/operation-type?${params}`;
+        } else if (district !== '不限') {
+            url = `${API_BASE}/childcare-centers/search/district?${params}`;
+        } else if (ratio !== '不限') {
+            url = `${API_BASE}/childcare-centers/search/ratio?${params}`;
+        } else if (capacity !== '不限') {
+            url = `${API_BASE}/childcare-centers/search/capacity?${params}`;
+        } else {
+            url = `${API_BASE}/childcare-centers`;
         }
 
-        // 收托容量
-        if (capacity !== '不限') {
-            const [min, max] = capacity.split('-');
-            query = query.gte('total_capacity', parseInt(min)).lte('total_capacity', parseInt(max));
+        const response = await fetch(url);
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || '搜尋失敗');
         }
 
-        // 營業時間：直接用資料庫的 open_time / close_time 欄位篩選
-        if (openTime !== '不限') {
-            query = query.lte('open_time', openTime + ':00');
-        }
-        if (closeTime !== '不限') {
-            query = query.gte('close_time', closeTime + ':00');
-        }
-
-        const { data: centers, error } = await query;
-        if (error) throw error;
-
+        const centers = await response.json();
         renderCenterCards(centers);
 
     } catch (err) {
         console.error('搜尋錯誤:', err);
-        alert('搜尋發生錯誤，請檢查資料庫連線！');
+        alert('搜尋發生錯誤：' + err.message);
     }
 });
 
@@ -65,7 +73,7 @@ document.getElementById('resetFilterBtn').addEventListener('click', function () 
     document.getElementById('applyFilterBtn').click();
 });
 
-// 渲染卡片
+// 渲染卡片（這部分不變）
 function renderCenterCards(centers) {
     const resultsList = document.getElementById('results-list');
     const resultCount = document.getElementById('result-count');
@@ -111,7 +119,11 @@ function renderCenterCards(centers) {
     });
 }
 
-// 從搜尋頁直接收藏
+// 收藏功能（暫時保留 Supabase，之後再換）
+const SUPABASE_URL = 'https://rfzavcliggzlpkqqcrzr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 async function addToFavorite(centerId) {
     const userId = localStorage.getItem('loggedInUserId');
     if (!userId) {
