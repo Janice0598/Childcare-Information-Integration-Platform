@@ -180,7 +180,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">管理員後台</div>
             <ul class="sidebar-menu">
-                <li class="active">📊 儀表板首頁 (Dashboard)</li>
+                <li class="active">📊 儀表板首頁</li>
                 <li>🏢 基本資料管理</li>
                 <li>👥 教職員管理</li>
                 <li>🖼️ 設施照片管理</li>
@@ -197,8 +197,10 @@
         <main class="main-content">
             <!-- 頂部資訊列 -->
             <header class="top-header">
-                <div>目前管理機構：<strong>████托嬰中心</strong></div>
-                <div>👤 管理員 您好</div>
+                <!-- 加上 id="admin-center-display" -->
+                <div id="admin-center-display">目前管理機構：<strong>載入中...</strong></div>
+                <!-- 加上 id="admin-name-display" -->
+                <div id="admin-name-display">👤 載入中... 您好</div>
             </header>
 
             <!-- 儀表板主要內容 -->
@@ -282,6 +284,8 @@
             </div>
         </main>
     </div>
-
+    
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin.js"></script>
 </body>
 </html>

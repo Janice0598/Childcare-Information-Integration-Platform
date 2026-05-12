@@ -109,7 +109,7 @@
 
     <!-- 頂部導覽列 (登入後狀態) -->
     <header class="navbar">
-        <div class="logo-placeholder">托育整合平台 Logo</div>
+        <div class="logo-placeholder">托育整合平台</div>
         <div class="nav-actions">
             <span>👋 你好，家長</span>
             <button class="wireframe-btn">回首頁</button>
@@ -121,24 +121,29 @@
     <div class="user-layout">
         
         <!-- 左側選單 (對應你提供的 Sitemap) -->
-        <aside class="user-sidebar">
+       <aside class="user-sidebar">
             <div class="user-profile-summary">
                 <div class="avatar-placeholder">大頭貼</div>
-                <h3>王小明 家長</h3>
-                <div class="text-line">user@example.com</div>
+                <!-- 加上 id="user-name-display" -->
+                <h3 id="user-name-display">載入中...</h3> 
+                <!-- 加上 id="user-email-display" -->
+                <div id="user-email-display" class="text-line">載入中...</div>
             </div>
             <ul class="user-menu">
-                <li><a href="#" class="active">會員首頁概況 (User Home)</a></li>
-                <li><a href="#">👤 個人資料設定 (/profile)</a></li>
-                <li><a href="#">📁 我的收藏資料夾 (/favorites)</a></li>
-                <li><a href="#">📝 我的評鑑紀錄 (/reviews)</a></li>
+                <li><a href="#" class="active">會員首頁概況</a></li>
+                <li><a href="#">👤 個人資料設定</a></li>
+                <li><a href="#">📁 我的收藏資料夾</a></li>
+                <li><a href="#">📝 我的評鑑紀錄</a></li>
             </ul>
         </aside>
 
         <!-- 右側主要內容區 -->
         <main class="user-main">
-            <div class="welcome-header">
-                <h2>會員總覽</h2>
+            <div class="welcome-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 15px; margin-bottom: 20px;">
+                <h2 style="margin: 0;">會員總覽</h2>
+                <a href="search.html" class="wireframe-btn primary" style="width: auto; margin: 0; padding: 8px 20px; text-decoration: none; display: inline-block; font-size: 14px;">
+                    🔍 開始搜尋托育機構
+                </a>
             </div>
 
             <!-- 數據總覽 -->
@@ -181,6 +186,7 @@
 
         </main>
     </div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="user.js"></script>
 </body>
 </html>
