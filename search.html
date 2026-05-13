@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>搜尋機構 - 托育資訊整合平台</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <!-- ========================================== -->
@@ -32,14 +34,22 @@
                 <h2>尋找適合的托育機構</h2>
                 <p class="text-line">透過左側面板設定您的篩選條件，我們會為您即時更新結果。</p>
             </div>
-            <div class="quick-search">
-                <input type="text" id="keyword-search" class="wireframe-input" placeholder="輸入機構名稱關鍵字...">
-                <button class="wireframe-btn primary">搜尋</button>
+            <div class="quick-search"
+                style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 30px; width: 100%;">
+
+                <input type="text" id="keyword-search" class="wireframe-input" placeholder="輸入機構名稱關鍵字..."
+                    style="width: 400px; height: 42px; padding: 0 15px; box-sizing: border-box; font-size: 16px;">
+
+                <button class="wireframe-btn primary" onclick="searchByKeyword()"
+                    style="height: 42px; padding: 0 24px; box-sizing: border-box; font-size: 16px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+                    搜尋
+                </button>
+
             </div>
         </div>
 
         <div class="search-layout">
-<!-- 左側：進階篩選器 -->
+            <!-- 左側：進階篩選器 -->
             <aside class="filter-sidebar">
                 <h3 class="filter-title">進階篩選</h3>
 
@@ -169,4 +179,5 @@
     <!-- 引入你寫好的搜尋邏輯 (確保你把這個檔案也上傳到同一個資料夾) -->
     <script src="search.js"></script>
 </body>
+
 </html>

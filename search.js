@@ -5,23 +5,23 @@ const API_BASE = 'http://localhost:3000/api';
 // 套用篩選條件
 document.getElementById('applyFilterBtn').addEventListener('click', async function () {
 
-    const category  = document.getElementById('filter-category').value;
+    const category = document.getElementById('filter-category').value;
     const operation = document.getElementById('filter-operation').value;
-    const district  = document.getElementById('filter-district').value;
-    const ratio     = document.getElementById('filter-ratio').value;
-    const openTime  = document.getElementById('filter-open-time').value;
+    const district = document.getElementById('filter-district').value;
+    const ratio = document.getElementById('filter-ratio').value;
+    const openTime = document.getElementById('filter-open-time').value;
     const closeTime = document.getElementById('filter-close-time').value;
-    const capacity  = document.getElementById('filter-capacity').value;
+    const capacity = document.getElementById('filter-capacity').value;
 
     try {
         // 建立 query string，只把「有選擇」的條件加進去
         const params = new URLSearchParams();
-        if (category  !== '不限') params.append('category', category);
+        if (category !== '不限') params.append('category', category);
         if (operation !== '不限') params.append('type', operation);
-        if (district  !== '不限') params.append('district', district);
-        if (ratio     !== '不限') params.append('ratio', ratio);
-        if (capacity  !== '不限') params.append('range', capacity);
-        if (openTime  !== '不限') params.append('open_time', openTime);
+        if (district !== '不限') params.append('district', district);
+        if (ratio !== '不限') params.append('ratio', ratio);
+        if (capacity !== '不限') params.append('range', capacity);
+        if (openTime !== '不限') params.append('open_time', openTime);
         if (closeTime !== '不限') params.append('close_time', closeTime);
 
         // 決定要打哪支 API
@@ -63,13 +63,13 @@ document.getElementById('applyFilterBtn').addEventListener('click', async functi
 
 // 清除條件
 document.getElementById('resetFilterBtn').addEventListener('click', function () {
-    document.getElementById('filter-category').value   = '不限';
-    document.getElementById('filter-operation').value  = '不限';
-    document.getElementById('filter-district').value   = '不限';
-    document.getElementById('filter-ratio').value      = '不限';
-    document.getElementById('filter-open-time').value  = '不限';
+    document.getElementById('filter-category').value = '不限';
+    document.getElementById('filter-operation').value = '不限';
+    document.getElementById('filter-district').value = '不限';
+    document.getElementById('filter-ratio').value = '不限';
+    document.getElementById('filter-open-time').value = '不限';
     document.getElementById('filter-close-time').value = '不限';
-    document.getElementById('filter-capacity').value   = '不限';
+    document.getElementById('filter-capacity').value = '不限';
     document.getElementById('applyFilterBtn').click();
 });
 
@@ -90,10 +90,10 @@ function renderCenterCards(centers) {
     }
 
     centers.forEach(center => {
-        const openTime  = center.open_time  ? center.open_time.slice(0, 5)  : '-';
+        const openTime = center.open_time ? center.open_time.slice(0, 5) : '-';
         const closeTime = center.close_time ? center.close_time.slice(0, 5) : '-';
-        const hours     = (openTime !== '-' && closeTime !== '-') ? `${openTime} - ${closeTime}` : '未提供';
-        const address   = [center.city, center.district, center.streetline].filter(Boolean).join(' ') || '未提供';
+        const hours = (openTime !== '-' && closeTime !== '-') ? `${openTime} - ${closeTime}` : '未提供';
+        const address = [center.city, center.district, center.streetline].filter(Boolean).join(' ') || '未提供';
 
         const cardHTML = `
             <div class="result-card">
@@ -106,11 +106,15 @@ function renderCenterCards(centers) {
                     <p class="text-line highlight">📍 ${address}</p>
                     <p class="text-line">🕐 營業時間：${hours}</p>
                     <p class="text-line">👩‍🏫 師生比：1:${center.teacher_student_ratio || '未提供'} ｜ 總容量：${center.total_capacity || 0} 人</p>
-                    <div class="card-actions">
+                    
+                    <div class="card-actions" style="display: flex; gap: 10px; justify-content: flex-end; align-items: center; margin-top: 15px;">
+                        
                         <a href="center-detail.html?id=${center.center_id}" 
                            class="wireframe-btn" 
-                           style="text-decoration:none;">查看詳情</a>
+                           style="text-decoration:none; font-size: 15px; font-weight: bold; padding: 0 16px; height: 42px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;">查看詳情</a>
+                        
                         <button class="wireframe-btn primary" 
+                                style="font-size: 15px; font-weight: bold; padding: 0 16px; height: 42px; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;"
                                 onclick="addToFavorite(${center.center_id})">❤️ 加入收藏</button>
                     </div>
                 </div>
@@ -154,3 +158,36 @@ async function addToFavorite(centerId) {
 window.onload = function () {
     document.getElementById('applyFilterBtn').click();
 };
+// 實作關鍵字搜尋功能
+function searchByKeyword() {
+    const keyword = document.getElementById('keyword-search').value.trim();
+    const allCards = document.querySelectorAll('.result-card');
+    
+    // 1. 準備一個計數器，從 0 開始算
+    let visibleCount = 0; 
+
+    allCards.forEach(card => {
+        const centerName = card.querySelector('.center-name').innerText;
+
+        if (centerName.includes(keyword) || keyword === "") {
+            card.style.display = ''; 
+            // 2. 如果這張卡片符合條件（顯示出來），計數器就 +1
+            visibleCount++; 
+        } else {
+            card.style.display = 'none'; 
+        }
+    });
+
+    // 3. 把算完的數字，更新到畫面的 id="result-count" 上面
+    const resultCountElement = document.getElementById('result-count');
+    if (resultCountElement) {
+        resultCountElement.innerText = visibleCount;
+    }
+}
+// 監聽輸入框的按鍵事件：按下 Enter 就執行搜尋
+document.getElementById('keyword-search').addEventListener('keypress', function (event) {
+    // 檢查按下的鍵是不是 Enter
+    if (event.key === 'Enter') {
+        searchByKeyword();
+    }
+});

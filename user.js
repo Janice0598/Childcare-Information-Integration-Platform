@@ -29,10 +29,31 @@ async function loadUserData() {
         document.getElementById('user-name-display').innerText = `${parentData.name} 家長`;
         document.getElementById('user-email-display').innerText = parentData.email;
 
-        // (進階) 如果你未來有 favorite_item 收藏表，可以像這樣抓數量：
-        // const { count } = await supabaseClient.from('favorite_item').select('*', { count: 'exact' }).eq('parent_id', userId);
-        // document.querySelector('.summary-number').innerText = count;
+        // 4. 去 favorite_item 資料表撈出這個家長的「收藏總數」
+        const { count, error: countError } = await supabaseClient
+            .from('favorite_item')
+            .select('*', { count: 'exact', head: true }) 
+            .eq('parent_id', userId);
 
+        if (countError) {
+            console.error('抓取收藏數量失敗：', countError);
+        } else {
+            // 把抓到的數字放到畫面上！
+            document.getElementById('fav-count-display').innerText = count || 0;
+        }
+
+        // 5. 去 reviews 資料表撈出這個家長的「發布評鑑總數」
+        const { count: reviewCount, error: reviewError } = await supabaseClient
+            .from('reviews')
+            .select('*', { count: 'exact', head: true }) 
+            .eq('parent_id', userId);
+
+        if (reviewError) {
+            console.error('抓取評鑑數量失敗：', reviewError);
+        } else {
+            // 把抓到的數字放到剛剛設定的 id 畫面上！
+            document.getElementById('review-count-display').innerText = reviewCount || 0;
+        }
     } catch (error) {
         console.error('讀取資料失敗：', error);
     }

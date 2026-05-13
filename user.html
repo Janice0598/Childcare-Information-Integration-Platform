@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,7 +60,8 @@
             font-weight: bold;
         }
 
-        .user-menu a:hover, .user-menu a.active {
+        .user-menu a:hover,
+        .user-menu a.active {
             background-color: #eaeaea;
             border-left: 4px solid #666;
         }
@@ -105,6 +107,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- 頂部導覽列 (登入後狀態) -->
@@ -119,54 +122,57 @@
 
     <!-- 會員中心主結構 -->
     <div class="user-layout">
-        
+
         <!-- 左側選單 (對應你提供的 Sitemap) -->
-       <aside class="user-sidebar">
+        <aside class="user-sidebar">
             <div class="user-profile-summary">
                 <div class="avatar-placeholder">大頭貼</div>
                 <!-- 加上 id="user-name-display" -->
-                <h3 id="user-name-display">載入中...</h3> 
+                <h3 id="user-name-display">載入中...</h3>
                 <!-- 加上 id="user-email-display" -->
                 <div id="user-email-display" class="text-line">載入中...</div>
             </div>
             <ul class="user-menu">
-                <li><a href="#" class="active">會員首頁概況</a></li>
+                <li><a href="user.html" class="active">會員首頁概況</a></li>
                 <li><a href="#">👤 個人資料設定</a></li>
-                <li><a href="#">📁 我的收藏資料夾</a></li>
-                <li><a href="#">📝 我的評鑑紀錄</a></li>
+                <li><a href="favorite.html">📁 我的收藏清單</a></li>
+                <li><a href="my-reviews.html">📝 我的評價紀錄</a></li>
             </ul>
         </aside>
 
         <!-- 右側主要內容區 -->
         <main class="user-main">
-            <div class="welcome-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 15px; margin-bottom: 20px;">
+            <div class="welcome-header"
+                style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 15px; margin-bottom: 20px;">
                 <h2 style="margin: 0;">會員總覽</h2>
-                <a href="search.html" class="wireframe-btn primary" style="width: auto; margin: 0; padding: 8px 20px; text-decoration: none; display: inline-block; font-size: 14px;">
+                <a href="search.html" class="wireframe-btn primary"
+                    style="width: auto; margin: 0; padding: 8px 20px; text-decoration: none; display: inline-block; font-size: 14px;">
                     🔍 開始搜尋托育機構
                 </a>
             </div>
 
             <!-- 數據總覽 -->
-            <div class="summary-grid">
+            <div style="display: flex; gap: 30px; justify-content: center; margin-bottom: 40px;">
+
                 <div class="summary-card">
-                    <div>建立的收藏資料夾</div>
-                    <div class="summary-number">3</div>
+                    <div style="font-size: 18px; color: #333; margin-bottom: 10px;">已收藏的機構數</div>
+                    <div class="summary-number" id="fav-count-display"
+                        style="font-size: 45px; font-weight: bold; color: #555;">0</div>
                 </div>
+
                 <div class="summary-card">
-                    <div>已收藏的機構數</div>
-                    <div class="summary-number">12</div>
+                    <div style="font-size: 18px; color: #333; margin-bottom: 10px;">已發布的評鑑</div>
+                    <div class="summary-number" id="review-count-display"
+                        style="font-size: 45px; font-weight: bold; color: #555;">0</div>
                 </div>
-                <div class="summary-card">
-                    <div>已發布的評鑑</div>
-                    <div class="summary-number">2</div>
-                </div>
+
             </div>
 
             <!-- 專案文件提到的：客製化推薦區塊 (Personalised Recommendation) -->
             <div class="recommendation-section">
                 <h3 style="margin-bottom: 15px;">✨ 專屬您的托育機構推薦</h3>
                 <p class="text-line" style="margin-bottom: 20px;">根據您設定的偏好（內湖區、月費 20,000 以內、需延托服務），我們為您推薦以下機構：</p>
-                
+
                 <div class="grid-container recommendations" style="grid-template-columns: repeat(2, 1fr);">
                     <!-- 推薦卡片 1 -->
                     <div class="card-placeholder">
@@ -186,7 +192,8 @@
 
         </main>
     </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="user.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="user.js"></script>
 </body>
+
 </html>

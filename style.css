@@ -16,6 +16,7 @@ body {
     margin: 40px 0 10px 0;
     border: 4px dashed #999;
 }
+
 .page-label {
     text-align: center;
     font-weight: bold;
@@ -78,6 +79,7 @@ body {
     color: #666;
     font-size: 14px;
 }
+
 .text-line.highlight {
     font-weight: bold;
     color: #333;
@@ -251,11 +253,13 @@ body {
 }
 
 .card-actions {
-    margin-top: auto; /* 將按鈕推到卡片最底部 */
+    margin-top: auto;
+    /* 將按鈕推到卡片最底部 */
     display: flex;
     gap: 10px;
     justify-content: flex-end;
 }
+
 /* ==========================================================================
    搜尋頁面特定 UI 元件優化
    ========================================================================== */
@@ -348,11 +352,11 @@ body {
     transition: var(--transition);
 }
 
-.checkbox-container:hover input ~ .checkmark {
+.checkbox-container:hover input~.checkmark {
     border-color: var(--primary-color);
 }
 
-.checkbox-container input:checked ~ .checkmark {
+.checkbox-container input:checked~.checkmark {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
 }
@@ -363,7 +367,7 @@ body {
     display: none;
 }
 
-.checkbox-container input:checked ~ .checkmark:after {
+.checkbox-container input:checked~.checkmark:after {
     display: block;
 }
 
@@ -395,4 +399,19 @@ body {
     border-radius: var(--border-radius);
     color: #64748b;
     font-weight: 600;
+}
+
+.summary-card {
+    background-color: #fff;
+    border: 2px solid #ccc;
+    /* 強制寫死長寬，保證一模一樣大 */
+    width: 200px;
+    height: 140px;
+    box-sizing: border-box; 
+    
+    /* 讓裡面的文字完美置中 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }

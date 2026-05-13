@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的評鑑紀錄 - 托育資訊整合平台</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 沿用會員中心排版 */
+        .user-layout { display: flex; max-width: 1200px; margin: 40px auto; gap: 30px; padding: 0 20px; }
+        .user-sidebar { width: 250px; background-color: #fff; border: 2px solid #ccc; height: fit-content; }
+        .user-profile-summary { padding: 20px; text-align: center; border-bottom: 2px solid #eee; }
+        .avatar-placeholder { width: 80px; height: 80px; background-color: #ccc; border-radius: 50%; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; color: #666; }
+        .user-menu { list-style: none; padding: 0; margin: 0; }
+        .user-menu li { border-bottom: 1px solid #eee; }
+        .user-menu a { display: block; padding: 15px 20px; text-decoration: none; color: #333; font-weight: bold; }
+        .user-menu a:hover, .user-menu a.active { background-color: #eaeaea; border-left: 4px solid #666; }
+        .user-main { flex-grow: 1; }
+        .welcome-header { margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid #ccc; }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <a href="index.html" style="text-decoration: none;">
+            <div class="logo-placeholder">托育整合平台</div>
+        </a>
+        <div class="nav-actions">
+            <span>👋 你好，家長</span>
+            <button class="wireframe-btn primary" onclick="logout()">登出</button>
+        </div>
+    </header>
+
+    <div class="user-layout">
+        <aside class="user-sidebar">
+            <div class="user-profile-summary">
+                <div class="avatar-placeholder">大頭貼</div>
+                <h3 id="user-name-display">載入中...</h3> 
+            </div>
+            <ul class="user-menu">
+                <li><a href="user.html">🏠 會員首頁概況</a></li>
+                <li><a href="#">👤 個人資料設定</a></li>
+                <li><a href="favorite.html">📁 我的收藏清單</a></li>
+                <li><a href="my-reviews.html" class="active">📝 我的評價紀錄</a></li>
+            </ul>
+        </aside>
+
+        <main class="user-main">
+            <div class="welcome-header">
+                <h2>📝 我的評價紀錄</h2>
+                <p class="text-line">您可以在這裡查看、修改或刪除您過去發布的所有機構評價。</p>
+            </div>
+
+            <div id="my-reviews-list" style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="empty-state">⏳ 正在載入您的評價資料...</div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="my-reviews.js"></script>
+</body>
+</html>
