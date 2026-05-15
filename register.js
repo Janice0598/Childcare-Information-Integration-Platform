@@ -4,14 +4,19 @@ const API_BASE = 'http://localhost:3000/api';
 document.getElementById('registerForm').addEventListener('submit', async function (event) {
     event.preventDefault();
 
-    const inputName = document.getElementById('name').value;
-    const inputPhone = document.getElementById('phone').value;
-    const inputEmail = document.getElementById('email').value;
+    const inputName = document.getElementById('name').value.trim();
+    const inputPhone = document.getElementById('phone').value.trim();
+    const inputEmail = document.getElementById('email').value.trim();
     const inputPassword = document.getElementById('password').value;
     const inputConfirm = document.getElementById('confirmPassword').value;
 
     if (inputPassword !== inputConfirm) {
         alert('兩次輸入的密碼不一致，請重新確認！');
+        return;
+    }
+
+    if (inputPassword.length < 6) {
+        alert('密碼長度至少需要 6 個字元！');
         return;
     }
 
@@ -34,7 +39,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
             return;
         }
 
-        alert('註冊成功！系統將跳轉至登入頁面，請使用新帳號登入。');
+        alert('✅ 註冊成功！系統將跳轉至登入頁面，請使用新帳號登入。');
         window.location.href = 'login.html';
 
     } catch (err) {
