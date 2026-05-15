@@ -12,22 +12,21 @@ async function loadUserData() {
     const userId = localStorage.getItem('loggedInUserId');
     const userRole = localStorage.getItem('userRole');
 
-    // 未登入或不是家長，踢回登入頁
     if (!userId || userRole !== 'parent') {
         alert('請先登入家長帳號！');
         window.location.href = 'login.html';
         return;
     }
 
-    // 更新 navbar 顯示名稱
     const userName = localStorage.getItem('loggedInUserName');
     const navName = document.getElementById('nav-user-name');
     if (navName) navName.innerText = `👋 你好，${userName || '家長'}`;
 
     try {
+        // 家長基本資料
         const { data: parentData, error } = await supabaseClient
             .from('parent')
-            .select('*')
+            .select('name, email')
             .eq('parent_id', userId)
             .single();
 
@@ -50,8 +49,8 @@ async function loadUserData() {
             .eq('parent_id', userId);
         document.getElementById('review-count-display').innerText = reviewCount || 0;
 
-    } catch (error) {
-        console.error('讀取資料失敗：', error);
+    } catch (err) {
+        console.error('讀取資料失敗：', err);
     }
 }
 
