@@ -33,7 +33,6 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             return;
         }
 
-        // 登入成功，儲存資訊
         localStorage.setItem('authToken', result.token);
         localStorage.setItem('loggedInUserName', result.data.name);
         localStorage.setItem('userRole', selectedRole);
