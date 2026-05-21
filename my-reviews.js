@@ -20,6 +20,7 @@ async function loadMyReviews() {
             .from('reviews')
             .select('*, childcare_center(name)')
             .eq('parent_id', userId)
+
             .order('created_at', { ascending: false });
 
         if (error) throw error;

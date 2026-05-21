@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理員註冊 - 托育資訊整合平台</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-container {
+            min-height: calc(100vh - 70px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background-color: #fff;
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid #ccc;
+        }
+
+        .auth-title {
+            text-align: center;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .auth-subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .auth-links {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .auth-links a {
+            color: #666;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .auth-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <a href="index.html" style="text-decoration: none;">
+            <div class="logo-placeholder">托育整合平台</div>
+        </a>
+    </header>
+
+    <main class="auth-container">
+        <div class="auth-card">
+            <h2 class="auth-title">🛡️ 管理員帳號註冊</h2>
+            <p class="auth-subtitle">註冊後請至登入頁面以管理員身分登入</p>
+
+            <form id="adminRegisterForm">
+                <div class="form-group">
+                    <label class="form-label" for="username">管理員姓名 (Username)</label>
+                    <input type="text" id="username" class="wireframe-input full-width"
+                        required placeholder="例如：王主任">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">電子郵件 (Email)</label>
+                    <input type="email" id="email" class="wireframe-input full-width"
+                        required placeholder="admin@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">設定密碼 (Password)</label>
+                    <input type="password" id="password" class="wireframe-input full-width"
+                        required placeholder="請設定 6 碼以上密碼">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="confirmPassword">確認密碼 (Confirm Password)</label>
+                    <input type="password" id="confirmPassword" class="wireframe-input full-width"
+                        required placeholder="請再次輸入密碼">
+                </div>
+
+                <button type="submit" class="wireframe-btn primary full-width">建立管理員帳號</button>
+            </form>
+
+            <div class="auth-links">
+                已經有帳號了？ <a href="login.html">返回登入</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        document.getElementById('adminRegisterForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('兩次輸入的密碼不一致，請重新確認！');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('密碼長度至少需要 6 個字元！');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    alert('註冊失敗：' + (result.error || '請檢查資料格式是否正確'));
+                    return;
+                }
+
+                alert('✅ 管理員帳號建立成功！請返回登入頁面以管理員身分登入。');
+                window.location.href = 'login.html';
+
+            } catch (err) {
+                console.error('系統發生錯誤:', err);
+                alert('無法連線到伺服器，請確認後端伺服器是否開啟。');
+            }
+        });
+    </script>
+</body>
+</html>

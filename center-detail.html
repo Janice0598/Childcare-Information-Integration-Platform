@@ -1,508 +1,407 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>機構詳細資訊 - 托育資訊整合平台</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .detail-container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .detail-header {
-            background: #fff;
-            border: 2px solid #ccc;
-            padding: 30px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .detail-title {
-            margin-bottom: 12px;
-        }
-
-        .detail-badge {
-            background: #e0e0e0;
-            padding: 4px 12px;
-            border: 1px solid #999;
-            font-size: 13px;
-            margin-right: 8px;
-        }
-
-        .detail-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .detail-card {
-            background: #fff;
-            border: 2px solid #ccc;
-            padding: 20px;
-        }
-
-        .detail-card h3 {
-            margin-bottom: 15px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 8px;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
-            gap: 10px;
-        }
-
-        .info-label {
-            color: #666;
-            white-space: nowrap;
-        }
-
-        .info-value {
-            font-weight: bold;
-            text-align: right;
-        }
-
-        .photo-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .photo-item {
-            height: 150px;
-            background: #eaeaea;
-            border: 1px dashed #999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            overflow: hidden;
-        }
-
-        .photo-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .staff-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-
-        .staff-table th,
-        .staff-table td {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            text-align: left;
-        }
-
-        .staff-table th {
-            background: #f9f9f9;
-            color: #666;
-        }
-
-        .review-item {
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .score-row {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin: 8px 0;
-        }
-
-        .score-tag {
-            font-size: 13px;
-            color: #555;
-        }
-
-        .score-tag span {
-            font-weight: bold;
-            color: #f59e0b;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 60px;
-            color: #999;
-            font-size: 18px;
-        }
-
-        .full-card {
-            margin-bottom: 20px;
-        }
+        .detail-container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .detail-header { background:#fff; border:2px solid #ccc; padding:30px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:flex-start; }
+        .detail-title { margin-bottom:12px; }
+        .detail-badge { background:#e0e0e0; padding:4px 12px; border:1px solid #999; font-size:13px; margin-right:8px; }
+        .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
+        .detail-card { background:#fff; border:2px solid #ccc; padding:20px; }
+        .detail-card h3 { margin-bottom:15px; border-bottom:2px solid #eee; padding-bottom:8px; }
+        .info-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0f0f0; font-size:14px; gap:10px; }
+        .info-label { color:#666; white-space:nowrap; }
+        .info-value { font-weight:bold; text-align:right; }
+        .photo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+        .photo-item { height:150px; background:#eaeaea; border:1px dashed #999; display:flex; align-items:center; justify-content:center; color:#999; overflow:hidden; }
+        .photo-item img { width:100%; height:100%; object-fit:cover; }
+        .staff-table { width:100%; border-collapse:collapse; font-size:14px; }
+        .staff-table th, .staff-table td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
+        .staff-table th { background:#f9f9f9; color:#666; }
+        .review-item { padding:15px 0; border-bottom:1px solid #eee; }
+        .score-row { display:flex; gap:20px; flex-wrap:wrap; margin:8px 0; }
+        .score-tag { font-size:13px; color:#555; }
+        .score-tag span { font-weight:bold; color:#f59e0b; }
+        .loading { text-align:center; padding:60px; color:#999; font-size:18px; }
+        .full-card { margin-bottom:20px; }
+        /* 評價表單 */
+        .review-form { background:#f8fafc; border:1px solid #e2e8f0; padding:20px; margin-top:20px; border-radius:4px; }
+        .review-form h4 { margin-bottom:15px; color:#333; }
+        .score-inputs { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:15px; }
+        .score-field label { display:block; font-size:13px; font-weight:bold; color:#555; margin-bottom:4px; }
+        .score-field select { width:100%; padding:8px; border:2px solid #ccc; font-size:14px; }
+        .review-form textarea { width:100%; padding:10px; border:2px solid #ccc; font-size:14px; resize:vertical; min-height:80px; }
+        .review-form button { margin-top:12px; padding:10px 24px; background:#666; color:#fff; border:none; font-weight:bold; cursor:pointer; font-size:14px; }
+        .review-form button:hover { background:#444; }
     </style>
 </head>
-
 <body>
 
-    <header class="navbar">
-        <a href="index.html" style="text-decoration:none;">
-            <div class="logo-placeholder">托育整合平台</div>
-        </a>
-        <div class="nav-actions">
-            <a href="search.html" class="wireframe-btn" style="text-decoration:none;">← 回搜尋結果</a>
-            <a href="user.html" class="wireframe-btn primary" style="text-decoration:none;">我的會員區</a>
-        </div>
-    </header>
-
-    <div class="detail-container">
-        <div id="loading" class="loading">⏳ 載入機構資料中...</div>
-        <div id="detail-content" style="display:none;">
-
-            <!-- 頂部：機構名稱與標籤 -->
-            <div class="detail-header">
-                <div>
-                    <h1 class="detail-title" id="center-name">-</h1>
-                    <div>
-                        <span class="detail-badge" id="center-category">-</span>
-                        <span class="detail-badge" id="center-operation">-</span>
-                        <span class="detail-badge" id="center-district">-</span>
-                    </div>
-                </div>
-                <button class="wireframe-btn primary" onclick="addToFavorite()">❤️ 加入收藏</button>
-            </div>
-
-            <!-- 基本資料 + 招生狀態 -->
-            <div class="detail-grid">
-                <div class="detail-card">
-                    <h3>📋 基本資料</h3>
-                    <div class="info-row">
-                        <span class="info-label">地址</span>
-                        <span class="info-value" id="center-address">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">電話</span>
-                        <span class="info-value" id="center-phone">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">營業時間</span>
-                        <span class="info-value" id="center-hours">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">師生比</span>
-                        <span class="info-value" id="center-ratio">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">總收托容量</span>
-                        <span class="info-value" id="center-capacity">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">負責人</span>
-                        <span class="info-value" id="center-rep">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">立案資格</span>
-                        <span class="info-value" id="center-qual">-</span>
-                    </div>
-                </div>
-
-                <div class="detail-card">
-                    <h3>📝 招生狀態</h3>
-                    <div class="info-row">
-                        <span class="info-label">目前招生狀態</span>
-                        <span class="info-value" id="enroll-accepting">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">候補人數</span>
-                        <span class="info-value" id="enroll-waitlist">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">月費</span>
-                        <span class="info-value" id="enroll-fee">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">服務時數</span>
-                        <span class="info-value" id="enroll-hours">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">延托服務</span>
-                        <span class="info-value" id="enroll-extended">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">最後更新</span>
-                        <span class="info-value" id="enroll-updated">-</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 設施照片 -->
-            <div class="detail-card full-card">
-                <h3>🖼️ 設施照片</h3>
-                <div class="photo-grid" id="photo-grid">
-                    <div class="photo-item">尚無照片</div>
-                </div>
-            </div>
-
-            <!-- 師資列表 -->
-            <div class="detail-card full-card">
-                <h3>👥 師資列表</h3>
-                <table class="staff-table">
-                    <thead>
-                        <tr>
-                            <th>姓名</th>
-                            <th>職稱</th>
-                            <th>資格證照</th>
-                            <th>簡介</th>
-                        </tr>
-                    </thead>
-                    <tbody id="staff-tbody">
-                        <tr>
-                            <td colspan="4" style="text-align:center;color:#999;padding:20px;">載入中...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- 政府評鑑 -->
-            <div class="detail-card full-card">
-                <h3>🏅 政府評鑑紀錄</h3>
-                <div id="evaluation-content">
-                    <p style="color:#999;text-align:center;">載入中...</p>
-                </div>
-            </div>
-
-            <!-- 家長評價 -->
-            <div class="detail-card full-card">
-                <h3>⭐ 家長評價與心得</h3>
-
-                <div id="reviews-summary"
-                    style="background: #f8fafc; padding: 20px; margin-bottom: 20px; border-radius: 8px; display: none; border: 1px solid #e2e8f0;">
-                    <h4 style="margin-bottom: 15px; color: #334155; text-align: center;">📊 機構平均評價指標</h4>
-                    <div
-                        style="display: flex; justify-content: space-around; font-size: 14px; font-weight: bold; text-align: center; color: #64748b;">
-                        <div>整體評分<br><span id="avg-overall" style="color: #f59e0b; font-size: 28px;">-</span> / 5</div>
-                        <div>師資品質<br><span id="avg-staff" style="color: #f59e0b; font-size: 28px;">-</span> / 5</div>
-                        <div>環境整潔<br><span id="avg-env" style="color: #f59e0b; font-size: 28px;">-</span> / 5</div>
-                        <div>課程活動<br><span id="avg-curr" style="color: #f59e0b; font-size: 28px;">-</span> / 5</div>
-                    </div>
-                </div>
-                <div id="reviews-list">
-                    <p style="color:#999; text-align:center; padding:30px;">⏳ 載入評價中...</p>
-                </div>
-            </div>
-
-        </div>
+<header class="navbar">
+    <a href="index.html" style="text-decoration:none;">
+        <div class="logo-placeholder">托育整合平台</div>
+    </a>
+    <div class="nav-actions">
+        <a href="search.html" class="wireframe-btn" style="text-decoration:none;">← 回搜尋結果</a>
+        <a href="user.html" class="wireframe-btn primary" style="text-decoration:none;">我的會員區</a>
     </div>
+</header>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const API_BASE = 'http://localhost:3000/api';
+<div class="detail-container">
+    <div id="loading" class="loading">⏳ 載入機構資料中...</div>
+    <div id="detail-content" style="display:none;">
 
-        const SUPABASE_URL = 'https://rfzavcliggzlpkqqcrzr.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        <!-- 頂部：機構名稱與標籤 -->
+        <div class="detail-header">
+            <div>
+                <h1 class="detail-title" id="center-name">-</h1>
+                <div>
+                    <span class="detail-badge" id="center-category">-</span>
+                    <span class="detail-badge" id="center-operation">-</span>
+                    <span class="detail-badge" id="center-district">-</span>
+                </div>
+            </div>
+            <button class="wireframe-btn primary" onclick="addToFavorite()">❤️ 加入收藏</button>
+        </div>
 
-        const params = new URLSearchParams(window.location.search);
-        const centerId = params.get('id');
+        <!-- 基本資料 + 招生狀態 -->
+        <div class="detail-grid">
+            <div class="detail-card">
+                <h3>📋 基本資料</h3>
+                <div class="info-row"><span class="info-label">地址</span><span class="info-value" id="center-address">-</span></div>
+                <div class="info-row"><span class="info-label">電話</span><span class="info-value" id="center-phone">-</span></div>
+                <div class="info-row"><span class="info-label">營業時間</span><span class="info-value" id="center-hours">-</span></div>
+                <div class="info-row"><span class="info-label">師生比</span><span class="info-value" id="center-ratio">-</span></div>
+                <div class="info-row"><span class="info-label">總收托容量</span><span class="info-value" id="center-capacity">-</span></div>
+                <div class="info-row"><span class="info-label">負責人</span><span class="info-value" id="center-rep">-</span></div>
+                <div class="info-row"><span class="info-label">立案資格</span><span class="info-value" id="center-qual">-</span></div>
+            </div>
+            <div class="detail-card">
+                <h3>📝 招生狀態</h3>
+                <div class="info-row"><span class="info-label">目前招生狀態</span><span class="info-value" id="enroll-accepting">-</span></div>
+                <div class="info-row"><span class="info-label">候補人數</span><span class="info-value" id="enroll-waitlist">-</span></div>
+                <div class="info-row"><span class="info-label">月費</span><span class="info-value" id="enroll-fee">-</span></div>
+                <div class="info-row"><span class="info-label">服務時數</span><span class="info-value" id="enroll-hours">-</span></div>
+                <div class="info-row"><span class="info-label">延托服務</span><span class="info-value" id="enroll-extended">-</span></div>
+                <div class="info-row"><span class="info-label">最後更新</span><span class="info-value" id="enroll-updated">-</span></div>
+            </div>
+        </div>
 
-        function formatTime(t) {
-            if (!t) return '-';
-            return t.slice(0, 5); // "07:00:00" → "07:00"
+        <!-- 設施照片 -->
+        <div class="detail-card full-card">
+            <h3>🖼️ 設施照片</h3>
+            <div class="photo-grid" id="photo-grid">
+                <div class="photo-item">載入中...</div>
+            </div>
+        </div>
+
+        <!-- 師資列表 -->
+        <div class="detail-card full-card">
+            <h3>👥 師資列表</h3>
+            <table class="staff-table">
+                <thead><tr><th>姓名</th><th>職稱</th><th>資格證照</th><th>簡介</th></tr></thead>
+                <tbody id="staff-tbody">
+                    <tr><td colspan="4" style="text-align:center;color:#999;padding:20px;">載入中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 政府評鑑 -->
+        <div class="detail-card full-card">
+            <h3>🏅 政府評鑑紀錄</h3>
+            <div id="evaluation-content"><p style="color:#999;text-align:center;">載入中...</p></div>
+        </div>
+
+        <!-- 家長評價 -->
+        <div class="detail-card full-card">
+            <h3>⭐ 家長評價與心得</h3>
+            <div id="reviews-list">
+                <p style="color:#999;text-align:center;padding:20px;">尚無評價</p>
+            </div>
+
+            <!-- 新增評價表單（僅登入家長可見） -->
+            <div class="review-form" id="review-form" style="display:none;">
+                <h4>✍️ 留下您的評價</h4>
+                <div class="score-inputs">
+                    <div class="score-field">
+                        <label>整體評分</label>
+                        <select id="score-overall">
+                            <option value="">請選擇</option>
+                            <option value="5">5 ⭐ 非常滿意</option>
+                            <option value="4">4 ⭐ 滿意</option>
+                            <option value="3">3 ⭐ 普通</option>
+                            <option value="2">2 ⭐ 不滿意</option>
+                            <option value="1">1 ⭐ 非常不滿意</option>
+                        </select>
+                    </div>
+                    <div class="score-field">
+                        <label>師資品質</label>
+                        <select id="score-staff">
+                            <option value="">請選擇</option>
+                            <option value="5">5 ⭐ 非常滿意</option>
+                            <option value="4">4 ⭐ 滿意</option>
+                            <option value="3">3 ⭐ 普通</option>
+                            <option value="2">2 ⭐ 不滿意</option>
+                            <option value="1">1 ⭐ 非常不滿意</option>
+                        </select>
+                    </div>
+                    <div class="score-field">
+                        <label>環境整潔</label>
+                        <select id="score-env">
+                            <option value="">請選擇</option>
+                            <option value="5">5 ⭐ 非常滿意</option>
+                            <option value="4">4 ⭐ 滿意</option>
+                            <option value="3">3 ⭐ 普通</option>
+                            <option value="2">2 ⭐ 不滿意</option>
+                            <option value="1">1 ⭐ 非常不滿意</option>
+                        </select>
+                    </div>
+                    <div class="score-field">
+                        <label>課程活動</label>
+                        <select id="score-curriculum">
+                            <option value="">請選擇</option>
+                            <option value="5">5 ⭐ 非常滿意</option>
+                            <option value="4">4 ⭐ 滿意</option>
+                            <option value="3">3 ⭐ 普通</option>
+                            <option value="2">2 ⭐ 不滿意</option>
+                            <option value="1">1 ⭐ 非常不滿意</option>
+                        </select>
+                    </div>
+                </div>
+                <textarea id="review-comment" placeholder="分享您對這間機構的心得（選填）..."></textarea>
+                <button onclick="submitReview()">📤 送出評價</button>
+                <div id="review-submit-result" style="margin-top:8px;font-size:14px;"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const API_BASE = 'http://localhost:3000/api';
+    const SUPABASE_URL = 'https://rfzavcliggzlpkqqcrzr.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const centerId = urlParams.get('id');
+
+    function formatTime(t) { return t ? t.slice(0, 5) : '-'; }
+    function formatDate(d) { return d ? d.slice(0, 10) : '-'; }
+
+    async function loadCenterDetail() {
+        if (!centerId) {
+            document.getElementById('loading').innerText = '找不到機構 ID，請從搜尋頁進入。';
+            return;
         }
+        try {
+            // 1. 機構基本資料 → 後端 API
+            const res = await fetch(`${API_BASE}/childcare-centers/${centerId}`);
+            if (!res.ok) throw new Error((await res.json()).error || '找不到該機構');
+            const center = await res.json();
 
-        function formatDate(d) {
-            if (!d) return '-';
-            return d.slice(0, 10);
-        }
+            document.title = `${center.name} - 托育資訊整合平台`;
+            document.getElementById('center-name').innerText = center.name || '-';
+            document.getElementById('center-category').innerText = center.category || '-';
+            document.getElementById('center-operation').innerText = center.operation_type || '-';
+            document.getElementById('center-district').innerText = center.district || '-';
+            document.getElementById('center-address').innerText =
+                [center.city, center.district, center.streetline].filter(Boolean).join(' ') || '-';
+            document.getElementById('center-phone').innerText = center.phone || '-';
+            document.getElementById('center-hours').innerText =
+                (center.open_time && center.close_time)
+                    ? `${formatTime(center.open_time)} - ${formatTime(center.close_time)}` : '-';
+            document.getElementById('center-ratio').innerText =
+                center.teacher_student_ratio ? `1 : ${center.teacher_student_ratio}` : '-';
+            document.getElementById('center-capacity').innerText =
+                center.total_capacity ? `${center.total_capacity} 人` : '-';
+            document.getElementById('center-rep').innerText = center.representative || '-';
+            document.getElementById('center-qual').innerText = center.qualification || '-';
 
-        async function loadCenterDetail() {
-            if (!centerId) {
-                document.getElementById('loading').innerText = '找不到機構 ID，請從搜尋頁進入。';
-                return;
+            // 2. 招生狀態 → Supabase
+            const { data: enrollment } = await supabaseClient
+                .from('enrollment_status').select('*').eq('center_id', centerId).single();
+            if (enrollment) {
+                document.getElementById('enroll-accepting').innerText =
+                    enrollment.is_accepting ? '✅ 開放招生中' : '❌ 暫停招生';
+                document.getElementById('enroll-waitlist').innerText = enrollment.waitlist_count ?? '-';
+                document.getElementById('enroll-fee').innerText =
+                    enrollment.monthly_fee ? `NT$ ${enrollment.monthly_fee.toLocaleString()}` : '-';
+                document.getElementById('enroll-hours').innerText =
+                    enrollment.service_hour ? `${enrollment.service_hour} 小時` : '-';
+                document.getElementById('enroll-extended').innerText =
+                    enrollment.extended_care ? '✅ 提供' : '❌ 不提供';
+                document.getElementById('enroll-updated').innerText = formatDate(enrollment.updated_at);
             }
 
-            try {
-                // 1. 機構基本資料（呼叫後端 API）
-                const response = await fetch(`${API_BASE}/childcare-centers/${centerId}`);
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error || '找不到該機構');
-                }
-                const center = await response.json();
-
-                document.title = `${center.name} - 托育資訊整合平台`;
-                document.getElementById('center-name').innerText = center.name || '-';
-                document.getElementById('center-category').innerText = center.category || '-';
-                document.getElementById('center-operation').innerText = center.operation_type || '-';
-                document.getElementById('center-district').innerText = center.district || '-';
-                document.getElementById('center-address').innerText =
-                    [center.city, center.district, center.streetline].filter(Boolean).join(' ') || '-';
-                document.getElementById('center-phone').innerText = center.phone || '-';
-                document.getElementById('center-hours').innerText =
-                    (center.open_time && center.close_time)
-                        ? `${formatTime(center.open_time)} - ${formatTime(center.close_time)}`
-                        : '-';
-                document.getElementById('center-ratio').innerText =
-                    center.teacher_student_ratio ? `1 : ${center.teacher_student_ratio}` : '-';
-                document.getElementById('center-capacity').innerText =
-                    center.total_capacity ? `${center.total_capacity} 人` : '-';
-                document.getElementById('center-rep').innerText = center.representative || '-';
-                document.getElementById('center-qual').innerText = center.qualification || '-';
-
-                // 2. 招生狀態
-                const { data: enrollment } = await supabaseClient
-                    .from('enrollment_status')
-                    .select('*')
-                    .eq('center_id', centerId)
-                    .single();
-                if (enrollment) {
-                    document.getElementById('enroll-accepting').innerText =
-                        enrollment.is_accepting ? '✅ 開放招生中' : '❌ 暫停招生';
-                    document.getElementById('enroll-waitlist').innerText =
-                        enrollment.waitlist_count ?? '-';
-                    document.getElementById('enroll-fee').innerText =
-                        enrollment.monthly_fee ? `NT$ ${enrollment.monthly_fee.toLocaleString()}` : '-';
-                    document.getElementById('enroll-hours').innerText =
-                        enrollment.service_hour ? `${enrollment.service_hour} 小時` : '-';
-                    document.getElementById('enroll-extended').innerText =
-                        enrollment.extended_care ? '✅ 提供' : '❌ 不提供';
-                    document.getElementById('enroll-updated').innerText =
-                        formatDate(enrollment.updated_at);
-                }
-
-                // 3. 設施照片
-                const { data: photos } = await supabaseClient
-                    .from('facility_photo')
-                    .select('*')
-                    .eq('center_id', centerId)
-                    .order('uploaded_at', { ascending: false });
-                if (photos && photos.length > 0) {
-                    document.getElementById('photo-grid').innerHTML = photos.map(p => `
-                <div class="photo-item">
-                    <img src="${p.url}" alt="${p.caption || '設施照片'}">
-                </div>
-            `).join('');
-                } else {
-                    document.getElementById('photo-grid').innerHTML =
-                        '<div class="photo-item" style="grid-column:1/-1;">尚無設施照片</div>';
-                }
-
-                // 4. 師資
-                const { data: staff } = await supabaseClient
-                    .from('staff')
-                    .select('*')
-                    .eq('center_id', centerId);
-                if (staff && staff.length > 0) {
-                    document.getElementById('staff-tbody').innerHTML = staff.map(s => `
-                <tr>
-                    <td>${s.name || '-'}</td>
-                    <td>${s.role || '-'}</td>
-                    <td>${s.qualification || '-'}</td>
-                    <td style="color:#666;">${s.biography || '-'}</td>
-                </tr>
-            `).join('');
-                } else {
-                    document.getElementById('staff-tbody').innerHTML =
-                        '<tr><td colspan="4" style="text-align:center;color:#999;padding:20px;">尚無師資資料</td></tr>';
-                }
-
-                // 5. 評鑑紀錄
-                const { data: evals } = await supabaseClient
-                    .from('evaluation_record')
-                    .select('*')
-                    .eq('center_id', centerId)
-                    .order('completion_date', { ascending: false });
-                if (evals && evals.length > 0) {
-                    document.getElementById('evaluation-content').innerHTML = evals.map(e => `
-                <div class="info-row">
-                    <span class="info-label">📅 ${e.evaluation_academic_year || '-'} 學年度</span>
-                    <span class="info-value">
-                        結果：${e.evalution_result || '-'}
-                        ${e.completion_date ? `（完成日期：${e.completion_date}）` : ''}
-                    </span>
-                </div>
-                ${e.non_compliance_details ? `
-                <div style="padding:8px 0;font-size:13px;color:#e74c3c;border-bottom:1px solid #f0f0f0;">
-                    ⚠️ 缺失說明：${e.non_compliance_details}
-                </div>` : ''}
-            `).join('');
-                } else {
-                    document.getElementById('evaluation-content').innerHTML =
-                        '<p style="color:#999;text-align:center;padding:10px;">尚無評鑑紀錄</p>';
-                }
-
-                // 6. 家長評價
-                const { data: reviews } = await supabaseClient
-                    .from('reviews')
-                    .select('*')
-                    .eq('center_id', centerId)
-                    .order('created_at', { ascending: false });
-                if (reviews && reviews.length > 0) {
-                    document.getElementById('reviews-list').innerHTML = reviews.map(r => `
-                <div class="review-item">
-                    <div class="score-row">
-                        <span class="score-tag">整體 <span>${r.score_overall ?? '-'}</span>/5</span>
-                        <span class="score-tag">師資 <span>${r.score_staff ?? '-'}</span>/5</span>
-                        <span class="score-tag">環境 <span>${r.score_enviroment ?? '-'}</span>/5</span>
-                        <span class="score-tag">課程 <span>${r.score_curriculum ?? '-'}</span>/5</span>
-                    </div>
-                    <div style="margin-top:8px;font-size:14px;color:#333;">
-                        ${r.comment || '（無文字評價）'}
-                    </div>
-                    <div style="margin-top:6px;font-size:12px;color:#999;">
-                        ${formatDate(r.created_at)}
-                    </div>
-                </div>
-            `).join('');
-                } else {
-                    document.getElementById('reviews-list').innerHTML =
-                        '<p style="color:#999;text-align:center;padding:20px;">尚無家長評價</p>';
-                }
-
-                // 全部載入完畢，顯示內容
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('detail-content').style.display = 'block';
-
-            } catch (err) {
-                console.error(err);
-                document.getElementById('loading').innerText = '❌ 載入失敗，請稍後再試。';
+            // 3. 設施照片 → 後端 API
+            const photoRes = await fetch(`${API_BASE}/photo/center/${centerId}`);
+            if (photoRes.ok) {
+                const photoResult = await photoRes.json();
+                const photos = photoResult.data;
+                document.getElementById('photo-grid').innerHTML =
+                    (photos && photos.length > 0)
+                        ? photos.map(p => `
+                            <div class="photo-item">
+                                <img src="${p.url}" alt="${p.caption || '設施照片'}">
+                            </div>`).join('')
+                        : '<div class="photo-item" style="grid-column:1/-1;">尚無設施照片</div>';
             }
-        }
 
-        async function addToFavorite() {
+            // 4. 師資 → Supabase
+            const { data: staff } = await supabaseClient
+                .from('staff').select('*').eq('center_id', centerId);
+            document.getElementById('staff-tbody').innerHTML =
+                (staff && staff.length > 0)
+                    ? staff.map(s => `<tr>
+                        <td>${s.name || '-'}</td>
+                        <td>${s.role || '-'}</td>
+                        <td>${s.qualification || '-'}</td>
+                        <td style="color:#666;">${s.biography || '-'}</td>
+                      </tr>`).join('')
+                    : '<tr><td colspan="4" style="text-align:center;color:#999;padding:20px;">尚無師資資料</td></tr>';
+
+            // 5. 評鑑紀錄 → Supabase
+            const { data: evals } = await supabaseClient
+                .from('evaluation_record').select('*').eq('center_id', centerId)
+                .order('completion_date', { ascending: false });
+            document.getElementById('evaluation-content').innerHTML =
+                (evals && evals.length > 0)
+                    ? evals.map(e => `
+                        <div class="info-row">
+                            <span class="info-label">📅 ${e.evaluation_academic_year || '-'} 學年度</span>
+                            <span class="info-value">結果：${e.evalution_result || '-'}
+                                ${e.completion_date ? `（完成日期：${e.completion_date}）` : ''}
+                            </span>
+                        </div>
+                        ${e.non_compliance_details ? `
+                        <div style="padding:8px 0;font-size:13px;color:#e74c3c;border-bottom:1px solid #f0f0f0;">
+                            ⚠️ 缺失說明：${e.non_compliance_details}
+                        </div>` : ''}`).join('')
+                    : '<p style="color:#999;text-align:center;padding:10px;">尚無評鑑紀錄</p>';
+
+            // 6. 家長評價 → Supabase
+            await loadReviews();
+
+            // 7. 若已登入為家長，顯示評價表單
             const userId = localStorage.getItem('loggedInUserId');
-            if (!userId) {
-                alert('請先登入才能收藏！');
-                window.location.href = 'login.html';
-                return;
+            const userRole = localStorage.getItem('userRole');
+            if (userId && userRole === 'parent') {
+                document.getElementById('review-form').style.display = 'block';
             }
-            try {
-                const { error } = await supabaseClient
-                    .from('favorite_item')
-                    .insert([{ parent_id: parseInt(userId), center_id: parseInt(centerId) }]);
-                if (error) {
-                    if (error.code === '23505') {
-                        alert('這間機構已在您的收藏清單中！');
-                    } else {
-                        throw error;
-                    }
-                } else {
-                    alert('✅ 已加入收藏！');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('收藏失敗，請稍後再試。');
-            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('detail-content').style.display = 'block';
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('loading').innerText = '❌ 載入失敗，請稍後再試。';
+        }
+    }
+
+    async function loadReviews() {
+        const { data: reviews } = await supabaseClient
+            .from('reviews').select('*').eq('center_id', centerId)
+            .order('created_at', { ascending: false });
+
+        document.getElementById('reviews-list').innerHTML =
+            (reviews && reviews.length > 0)
+                ? reviews.map(r => `
+                    <div class="review-item">
+                        <div class="score-row">
+                            <span class="score-tag">整體 <span>${r.score_overall ?? '-'}</span>/5</span>
+                            <span class="score-tag">師資 <span>${r.score_staff ?? '-'}</span>/5</span>
+                            <span class="score-tag">環境 <span>${r.score_enviroment ?? '-'}</span>/5</span>
+                            <span class="score-tag">課程 <span>${r.score_curriculum ?? '-'}</span>/5</span>
+                        </div>
+                        <div style="margin-top:8px;font-size:14px;color:#333;">
+                            ${r.comment || '（無文字評價）'}
+                        </div>
+                        <div style="margin-top:6px;font-size:12px;color:#999;">${formatDate(r.created_at)}</div>
+                    </div>`).join('')
+                : '<p style="color:#999;text-align:center;padding:20px;">尚無家長評價</p>';
+    }
+
+    async function submitReview() {
+        const userId = localStorage.getItem('loggedInUserId');
+        const resultDiv = document.getElementById('review-submit-result');
+
+        const scoreOverall   = document.getElementById('score-overall').value;
+        const scoreStaff     = document.getElementById('score-staff').value;
+        const scoreEnv       = document.getElementById('score-env').value;
+        const scoreCurriculum = document.getElementById('score-curriculum').value;
+        const comment        = document.getElementById('review-comment').value.trim();
+
+        if (!scoreOverall || !scoreStaff || !scoreEnv || !scoreCurriculum) {
+            resultDiv.innerText = '⚠️ 請填寫所有評分項目！';
+            resultDiv.style.color = '#e74c3c';
+            return;
         }
 
-        loadCenterDetail();
-    </script>
-</body>
+        try {
+            const { error } = await supabaseClient
+                .from('reviews')
+                .insert([{
+                    parent_id:        parseInt(userId),
+                    center_id:        parseInt(centerId),
+                    score_overall:    parseInt(scoreOverall),
+                    score_staff:      parseInt(scoreStaff),
+                    score_enviroment: parseInt(scoreEnv),
+                    score_curriculum: parseInt(scoreCurriculum),
+                    comment:          comment || null
+                }]);
 
+            if (error) throw error;
+
+            resultDiv.innerText = '✅ 評價送出成功！';
+            resultDiv.style.color = '#16a34a';
+
+            // 清空表單
+            document.getElementById('score-overall').value = '';
+            document.getElementById('score-staff').value = '';
+            document.getElementById('score-env').value = '';
+            document.getElementById('score-curriculum').value = '';
+            document.getElementById('review-comment').value = '';
+
+            // 重新載入評價列表
+            await loadReviews();
+
+        } catch (err) {
+            console.error('送出評價失敗:', err);
+            resultDiv.innerText = '❌ 送出失敗，請稍後再試。';
+            resultDiv.style.color = '#e74c3c';
+        }
+    }
+
+    async function addToFavorite() {
+        const userId   = localStorage.getItem('loggedInUserId');
+        const userRole = localStorage.getItem('userRole');
+        if (!userId || userRole !== 'parent') {
+            alert('請先登入家長帳號才能收藏！');
+            window.location.href = 'login.html';
+            return;
+        }
+        try {
+            const { error } = await supabaseClient
+                .from('favorite_item')
+                .insert([{ parent_id: parseInt(userId), center_id: parseInt(centerId) }]);
+            if (error) {
+                alert(error.code === '23505' ? '這間機構已在您的收藏清單中！' : '收藏失敗，請稍後再試。');
+            } else {
+                alert('✅ 已加入收藏！');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('收藏失敗，請稍後再試。');
+        }
+    }
+
+    loadCenterDetail();
+</script>
+</body>
 </html>

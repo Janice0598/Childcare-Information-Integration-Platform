@@ -15,19 +15,19 @@
         }
 
         .auth-card {
-            background-color: var(--surface-color);
+            background-color: #fff;
             width: 100%;
             max-width: 400px;
             padding: 40px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid #ccc;
         }
 
         .auth-title {
             text-align: center;
             margin-bottom: 30px;
-            color: var(--primary-color);
+            color: #333;
         }
 
         .form-group {
@@ -38,20 +38,31 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: var(--text-main);
+            color: #333;
             font-size: 14px;
         }
 
         .auth-links {
-            margin-top: 20px;
+            margin-top: 16px;
             text-align: center;
             font-size: 14px;
+            color: #666;
         }
-        
+
         .auth-links a {
-            color: var(--primary-color);
+            color: #444;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: bold;
+        }
+
+        .auth-links a:hover {
+            text-decoration: underline;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 16px 0;
         }
     </style>
 </head>
@@ -66,39 +77,46 @@
     <main class="auth-container">
         <div class="auth-card">
             <h2 class="auth-title">會員登入</h2>
-            
-            <!-- 登入表單 -->
+
             <form id="loginForm">
-                    <div class="form-group">
-                        <label class="form-label" for="role">登入身分</label>
-                        <select id="role" class="wireframe-input full-width">
-                            <option value="parent">家長</option>
-                            <option value="admin">平台管理員</option>
+                <div class="form-group">
+                    <label class="form-label" for="role">登入身分</label>
+                    <select id="role" class="wireframe-input full-width">
+                        <option value="parent">家長</option>
+                        <option value="admin">機構管理員</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="email">電子郵件 (Email)</label>
-                    <input type="email" id="email" class="wireframe-input full-width" required placeholder="user@example.com">
+                    <input type="email" id="email" class="wireframe-input full-width"
+                        required placeholder="user@example.com">
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label" for="password">密碼 (Password)</label>
-                    <input type="password" id="password" class="wireframe-input full-width" required placeholder="輸入密碼">
+                    <input type="password" id="password" class="wireframe-input full-width"
+                        required placeholder="輸入密碼">
                 </div>
 
                 <button type="submit" class="wireframe-btn primary full-width">登入</button>
             </form>
 
+            <!-- 家長註冊連結 -->
             <div class="auth-links">
-                還沒有帳號嗎？ <a href="register.html">立即註冊</a>
+                還沒有帳號嗎？ <a href="register.html">家長立即註冊</a>
+            </div>
+
+            <hr class="divider">
+
+            <!-- 管理員註冊連結 -->
+            <div class="auth-links">
+                機構管理員？ <a href="admin-register.html">建立管理員帳號</a>
             </div>
         </div>
     </main>
-<!-- 1. 先引入 Supabase 官方套件 (這行非常重要，一定要在 auth.js 前面！) -->
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- 2. 再引入你自己寫的登入邏輯 -->
     <script src="auth.js"></script>
 </body>
 </html>
