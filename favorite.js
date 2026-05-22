@@ -127,10 +127,16 @@ function renderFavoriteCard(center) {
                 <p class="text-line">🕐 營業時間：${hours}</p>
                 <p class="text-line">👩‍🏫 師生比：1:${center.teacher_student_ratio || '未提供'} ｜ 總容量：${center.total_capacity || 0} 人</p>
                 <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: auto; padding-top: 10px;">
-                    <a href="center-detail.html?id=${center.center_id}" class="wireframe-btn" style="text-decoration:none;">查看詳情</a>
-                    <button class="wireframe-btn" style="background-color:#ef4444;color:white;border:1px solid #ef4444;cursor:pointer;"
-                        onclick="removeFavorite(${center.center_id})">🗑️ 移除收藏</button>
-                </div>
+    <a href="center-detail.html?id=${center.center_id}" class="wireframe-btn" 
+       style="text-decoration:none; font-size:14px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;">
+        🔍 查看詳情
+    </a>
+    <button class="wireframe-btn" 
+            style="background-color:#ef4444; color:white; border:1px solid #ef4444; cursor:pointer; font-size:14px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;"
+            onclick="removeFavorite(${center.center_id})">
+        🗑️ 移除收藏
+    </button>
+</div>
             </div>
         </div>`;
 }

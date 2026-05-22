@@ -415,3 +415,38 @@ body {
     justify-content: center;
     align-items: center;
 }
+/* 讓導航列中的所有按鈕（無論 a 或 button）樣式一致 */
+.nav-actions .wireframe-btn,
+.nav-actions button.wireframe-btn,
+.nav-actions a.wireframe-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: normal;
+    text-decoration: none;
+    background-color: transparent;
+    border: 2px solid #666;
+    color: #333;
+    cursor: pointer;
+    min-width: 80px;      /* 設定最小寬度，讓兩個按鈕等寬 */
+    box-sizing: border-box;
+    transition: 0.2s;
+}
+
+.nav-actions .wireframe-btn.primary {
+    background-color: #666;
+    color: white;
+    border-color: #666;
+}
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.nav-actions span {
+    line-height: 1;
+    font-size: 14px;
+    color: #333;
+}
