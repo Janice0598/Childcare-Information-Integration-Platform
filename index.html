@@ -114,16 +114,15 @@
             const userId = localStorage.getItem('loggedInUserId');
             const userName = localStorage.getItem('loggedInUserName');
             if (userId && userName) {
+                // 已登入：顯示問候、我的會員區、登出
                 container.innerHTML = `
                     <span style="margin-right: 10px;">👋 你好，${userName}</span>
                     <a href="user.html" class="wireframe-btn primary" style="text-decoration: none;">我的會員區</a>
                     <button class="wireframe-btn" onclick="logout()">登出</button>
                 `;
             } else {
-                container.innerHTML = `
-                    <a href="login.html" class="wireframe-btn" style="text-decoration: none;">會員登入</a>
-                    <a href="search.html" class="wireframe-btn primary" style="text-decoration: none;">搜尋機構</a>
-                `;
+                // 未登入：只顯示「會員登入」按鈕（不顯示搜尋機構）
+                container.innerHTML = `<a href="login.html" class="wireframe-btn" style="text-decoration: none;">會員登入</a>`;
             }
         }
 
@@ -138,7 +137,6 @@
             const grid = document.getElementById('recommend-grid');
             grid.innerHTML = '<div class="loading">⏳ 載入推薦中...</div>';
             try {
-                // 從後端取得所有機構（或隨機幾筆），這裡先取得全部再隨機選取
                 const response = await fetch(`${API_BASE}/childcare-centers`);
                 if (!response.ok) throw new Error('無法取得機構資料');
                 let centers = await response.json();
@@ -153,7 +151,6 @@
                     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
                 }
                 const randomCenters = shuffled.slice(0, 4);
-                // 為每間機構取得第一張照片（非同步）
                 const cards = await Promise.all(randomCenters.map(async (center) => {
                     let photoUrl = null;
                     try {

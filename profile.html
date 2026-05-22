@@ -185,10 +185,10 @@
     <main class="user-main">
         <div class="welcome-header">
             <h2>👤 個人資料設定</h2>
-            <p class="text-line">您可以在這裡修改您的姓名、電子郵件，以及托育偏好設定。</p>
+            <p class="text-line">您可以在這裡修改您的姓名、電子郵件與聯絡電話。</p>
         </div>
 
-        <!-- 基本資料修改區塊 -->
+        <!-- 基本資料修改區塊（含電話） -->
         <div class="profile-section">
             <h3>📋 基本資料</h3>
             <form id="profile-form">
@@ -200,12 +200,16 @@
                     <label>電子郵件</label>
                     <input type="email" id="email" name="email" required placeholder="your@email.com">
                 </div>
+                <div class="form-group">
+                    <label>聯絡電話</label>
+                    <input type="tel" id="phone" name="phone" placeholder="0912345678">
+                </div>
                 <button type="submit" class="btn-save">儲存基本資料</button>
                 <div id="basic-message"></div>
             </form>
         </div>
 
-        <!-- 托育偏好設定區塊 -->
+        <!-- 托育偏好設定區塊（保持原有） -->
         <div class="profile-section">
             <h3>✨ 托育偏好設定</h3>
             <p class="text-line">設定您的偏好後，我們會為您推薦最適合的托育機構，並顯示在下方。</p>
@@ -262,7 +266,7 @@
                 <div id="pref-message"></div>
             </form>
 
-            <!-- 根據偏好顯示推薦機構 -->
+            <!-- 推薦機構區塊 -->
             <div style="margin-top: 30px;">
                 <h4>🎯 為您推薦的機構</h4>
                 <div id="recommend-list" class="recommendation-grid">
@@ -279,22 +283,24 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // 登出
     function logout() {
         localStorage.clear();
         window.location.href = 'login.html';
     }
 
-    // 顯示快取使用者資訊
+    // 顯示快取的使用者資訊
     function displayCachedUserInfo() {
         const userName = localStorage.getItem('loggedInUserName');
         const userEmail = localStorage.getItem('loggedInUserEmail');
-        document.getElementById('user-name-display').innerText = userName ? `${userName} 家長` : '';
-        document.getElementById('user-email-display').innerText = (userEmail && userEmail.trim()) ? userEmail : '';
-        document.getElementById('nav-user-name').innerText = userName ? `👋 你好，${userName}` : '👋 你好，家長';
+        const nameDisplay = document.getElementById('user-name-display');
+        const emailDisplay = document.getElementById('user-email-display');
+        const navName = document.getElementById('nav-user-name');
+        if (nameDisplay) nameDisplay.innerText = userName ? `${userName} 家長` : '';
+        if (emailDisplay) emailDisplay.innerText = (userEmail && userEmail.trim()) ? userEmail : '';
+        if (navName) navName.innerText = userName ? `👋 你好，${userName}` : '👋 你好，家長';
     }
 
-    // 從資料庫載入基本資料
+    // 從資料庫載入基本資料（含電話）
     async function loadUserData() {
         const userId = localStorage.getItem('loggedInUserId');
         const userRole = localStorage.getItem('userRole');
@@ -306,15 +312,18 @@
         try {
             const { data, error } = await supabaseClient
                 .from('parent')
-                .select('name, email')
+                .select('name, email, phone')
                 .eq('parent_id', parseInt(userId))
                 .maybeSingle();
             if (error) throw error;
             if (data) {
                 document.getElementById('name').value = data.name || '';
                 document.getElementById('email').value = data.email || '';
+                document.getElementById('phone').value = data.phone || '';
+                // 更新 localStorage
                 if (data.name) localStorage.setItem('loggedInUserName', data.name);
                 if (data.email) localStorage.setItem('loggedInUserEmail', data.email);
+                if (data.phone) localStorage.setItem('loggedInUserPhone', data.phone);
                 displayCachedUserInfo();
             }
         } catch (err) {
@@ -323,12 +332,14 @@
         }
     }
 
-    // 儲存基本資料
+    // 儲存基本資料（含電話）
     async function saveProfile(event) {
         event.preventDefault();
         const userId = localStorage.getItem('loggedInUserId');
         const newName = document.getElementById('name').value.trim();
         const newEmail = document.getElementById('email').value.trim();
+        const newPhone = document.getElementById('phone').value.trim();
+
         if (!newName) {
             showBasicMessage('請填寫姓名', 'error');
             return;
@@ -338,13 +349,17 @@
             return;
         }
         try {
+            const updateData = { name: newName, email: newEmail };
+            if (newPhone) updateData.phone = newPhone;
             const { error } = await supabaseClient
                 .from('parent')
-                .update({ name: newName, email: newEmail })
+                .update(updateData)
                 .eq('parent_id', parseInt(userId));
             if (error) throw error;
+            // 更新 localStorage
             localStorage.setItem('loggedInUserName', newName);
             localStorage.setItem('loggedInUserEmail', newEmail);
+            if (newPhone) localStorage.setItem('loggedInUserPhone', newPhone);
             displayCachedUserInfo();
             showBasicMessage('✅ 基本資料已更新！', 'success');
         } catch (err) {
@@ -359,8 +374,7 @@
         setTimeout(() => div.innerHTML = '', 3000);
     }
 
-    // ========== 偏好設定與推薦功能 ==========
-    // 從 localStorage 載入偏好並填入表單
+    // 偏好設定相關功能（保持原有）
     function loadPreferencesFromStorage() {
         const pref = localStorage.getItem('parentPreferences');
         if (pref) {
@@ -374,7 +388,6 @@
         }
     }
 
-    // 儲存偏好到 localStorage，並重新推薦
     async function savePreferences(event) {
         event.preventDefault();
         const preferences = {
@@ -388,42 +401,23 @@
         await updateRecommendations(preferences);
     }
 
-    // 根據偏好從資料庫查詢機構並顯示
     async function updateRecommendations(pref) {
         const listDiv = document.getElementById('recommend-list');
         listDiv.innerHTML = '<div class="no-data">⏳ 載入推薦中...</div>';
-
-        let query = supabaseClient.from('childcare_centers').select('*, evaluation_record(evalution_result)');
-        // 行政區過濾
-        if (pref.district) {
-            query = query.eq('district', pref.district);
-        }
-        // 機構類別過濾
-        if (pref.category) {
-            query = query.eq('category', pref.category);
-        }
-        // 延托服務過濾 (如果偏好 true/false)
+        let query = supabaseClient.from('childcare_centers').select('*');
+        if (pref.district) query = query.eq('district', pref.district);
+        if (pref.category) query = query.eq('category', pref.category);
         if (pref.extended !== '') {
             const extendedBool = pref.extended === 'true';
             query = query.eq('extended_care', extendedBool);
         }
-
         const { data: centers, error } = await query.limit(6);
-        if (error) {
-            console.error(error);
-            listDiv.innerHTML = '<div class="no-data">載入失敗，請稍後再試</div>';
+        if (error || !centers || centers.length === 0) {
+            listDiv.innerHTML = '<div class="no-data">沒有符合偏好的機構，試試放寬條件～</div>';
             return;
         }
-
-        if (!centers || centers.length === 0) {
-            listDiv.innerHTML = '<div class="no-data">沒有符合您偏好的機構，試試放寬條件～</div>';
-            return;
-        }
-
-        // 過濾評鑑等級 (因為評鑑紀錄在另一張表，需比對)
         let filtered = centers;
         if (pref.evaluation) {
-            // 先取得每個機構的最新評鑑結果 (簡化: 假設 evaluation_record 中 evalution_result 直接匹配)
             const centerIds = centers.map(c => c.center_id);
             const { data: evals } = await supabaseClient
                 .from('evaluation_record')
@@ -431,41 +425,24 @@
                 .in('center_id', centerIds)
                 .order('completion_date', { ascending: false });
             const latestEval = {};
-            if (evals) {
-                evals.forEach(e => {
-                    if (!latestEval[e.center_id]) latestEval[e.center_id] = e.evalution_result;
-                });
-            }
-            filtered = centers.filter(c => {
-                const evalResult = latestEval[c.center_id];
-                if (!evalResult && pref.evaluation) return false;
-                return evalResult === pref.evaluation;
-            });
+            if (evals) evals.forEach(e => { if (!latestEval[e.center_id]) latestEval[e.center_id] = e.evalution_result; });
+            filtered = centers.filter(c => latestEval[c.center_id] === pref.evaluation);
         }
-
         if (filtered.length === 0) {
-            listDiv.innerHTML = '<div class="no-data">沒有符合評鑑等級要求的機構</div>';
+            listDiv.innerHTML = '<div class="no-data">沒有符合評鑑等級的機構</div>';
             return;
         }
-
-        // 顯示推薦卡片
-        listDiv.innerHTML = filtered.map(center => {
-            // 計算距離模擬 (隨機或可省略)
-            const distance = (Math.random() * 5 + 0.5).toFixed(1);
-            const evalResult = center.evaluation_record?.[0]?.evalution_result || '評鑑中';
-            return `
-                <div class="rec-card">
-                    <h4>🏫 ${center.name || '機構名稱'}</h4>
-                    <div class="detail">📍 ${center.district || ''} ${center.streetline || ''}</div>
-                    <div class="detail">⭐ 評鑑：${evalResult}</div>
-                    <div class="detail">📞 ${center.phone || '未提供'}</div>
-                    <div class="detail">🕒 營業時間：${center.open_time || '-'} ~ ${center.close_time || '-'}</div>
-                    <div style="margin-top:10px;">
-                        <a href="center-detail.html?id=${center.center_id}" class="wireframe-btn" style="text-decoration:none; font-size:12px;">查看詳情</a>
-                    </div>
+        listDiv.innerHTML = filtered.map(center => `
+            <div class="rec-card">
+                <h4>🏫 ${center.name || '機構名稱'}</h4>
+                <div class="detail">📍 ${center.district || ''} ${center.streetline || ''}</div>
+                <div class="detail">⭐ 評鑑：請查看詳情</div>
+                <div class="detail">📞 ${center.phone || '未提供'}</div>
+                <div style="margin-top:10px;">
+                    <a href="center-detail.html?id=${center.center_id}" class="wireframe-btn" style="text-decoration:none; font-size:12px;">查看詳情</a>
                 </div>
-            `;
-        }).join('');
+            </div>
+        `).join('');
     }
 
     function showPrefMessage(msg, type) {
@@ -474,25 +451,20 @@
         setTimeout(() => div.innerHTML = '', 3000);
     }
 
-    // 初始化頁面：載入基本資料 + 偏好設定
     async function init() {
         displayCachedUserInfo();
         await loadUserData();
         loadPreferencesFromStorage();
-        // 如果有已儲存的偏好，自動推薦
         const pref = localStorage.getItem('parentPreferences');
         if (pref) {
             try {
-                const p = JSON.parse(pref);
-                await updateRecommendations(p);
+                await updateRecommendations(JSON.parse(pref));
             } catch(e) { console.warn(e); }
         }
     }
 
-    // 事件綁定
     document.getElementById('profile-form').addEventListener('submit', saveProfile);
     document.getElementById('preference-form').addEventListener('submit', savePreferences);
-
     init();
 </script>
 </body>
