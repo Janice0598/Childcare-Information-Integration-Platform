@@ -75,7 +75,11 @@ function renderFavoriteCard(center) {
 
   listContainer.innerHTML += `
         <div class="result-card" id="fav-card-${center.center_id}">
-            <div class="card-image">機構圖片</div>
+          <div class="card-image" style="overflow:hidden;">
+    <img id="thumb-${center.center_id}" src="" alt="機構圖片"
+        style="width:100%;height:100%;object-fit:cover;display:none;">
+    <span id="thumb-placeholder-${center.center_id}">機構圖片</span>
+</div>
             <div class="card-content">
                 <div class="card-header">
                     <h3 class="center-name">${
@@ -101,6 +105,24 @@ function renderFavoriteCard(center) {
                 </div>
             </div>
         </div>`;
+  fetch(`${API_BASE}/photo/center/${center.center_id}`)
+    .then((res) => (res.ok ? res.json() : null))
+    .then((result) => {
+      if (!result || !result.data || result.data.length === 0) return;
+      const firstPhoto =
+        result.data.find((p) => p.photo_id === 1) || result.data[0];
+      if (!firstPhoto?.url) return;
+      const img = document.getElementById(`thumb-${center.center_id}`);
+      const placeholder = document.getElementById(
+        `thumb-placeholder-${center.center_id}`
+      );
+      if (img) {
+        img.src = firstPhoto.url;
+        img.style.display = "block";
+      }
+      if (placeholder) placeholder.style.display = "none";
+    })
+    .catch(() => {});
 }
 
 async function removeFavorite(centerId) {
