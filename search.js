@@ -151,8 +151,8 @@ function renderCenterCards(centers) {
 
 // 加入收藏（檢查 parent 身分）
 async function addToFavorite(centerId) {
-  const userId = localStorage.getItem("loggedInUserId");
-  const userRole = localStorage.getItem("userRole");
+  const userId = sessionStorage.getItem("loggedInUserId");
+  const userRole = sessionStorage.getItem("userRole");
 
   if (!userId || userRole !== "parent") {
     alert("請先登入家長帳號才能收藏！");
