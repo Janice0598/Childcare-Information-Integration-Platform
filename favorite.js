@@ -9,10 +9,60 @@ function logout() {
     window.location.href = 'login.html';
 }
 
+async function loadUserProfile() {
+    const userId = localStorage.getItem('loggedInUserId');
+    const userRole = localStorage.getItem('userRole');
+
+    if (!userId || userRole !== 'parent') {
+        alert('請先登入家長帳號');
+        window.location.href = 'login.html';
+        return null;
+    }
+
+    let userName = localStorage.getItem('loggedInUserName');
+    let userEmail = localStorage.getItem('loggedInUserEmail');
+
+    if (!userName || !userEmail) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('parent')   // ✅ 表名為 parent
+                .select('name, email')
+                .eq('parent_id', parseInt(userId))
+                .maybeSingle();
+
+            if (error) {
+                console.error('查詢 parent 表失敗：', error);
+            }
+            if (data) {
+                userName = data.name;
+                userEmail = data.email;
+                if (userName) localStorage.setItem('loggedInUserName', userName);
+                if (userEmail) localStorage.setItem('loggedInUserEmail', userEmail);
+            }
+        } catch (err) {
+            console.error('載入使用者資料失敗：', err);
+        }
+    }
+
+    userName = userName || '家長';
+    userEmail = (userEmail && userEmail.trim() !== '') ? userEmail : '尚未設定 Email';
+
+    const nameDisplay = document.getElementById('user-name-display');
+    const emailDisplay = document.getElementById('user-email-display');
+    if (nameDisplay) nameDisplay.innerText = userName;
+    if (emailDisplay) emailDisplay.innerText = userEmail;
+
+    const navUserNameSpan = document.getElementById('nav-user-name');
+    if (navUserNameSpan) {
+        navUserNameSpan.innerText = `👋 你好，${userName}`;
+    }
+
+    return { userName, userEmail };
+}
+
 async function loadFavorites() {
     const userId = localStorage.getItem('loggedInUserId');
     const userRole = localStorage.getItem('userRole');
-    const userName = localStorage.getItem('loggedInUserName');
 
     if (!userId || userRole !== 'parent') {
         alert('請先登入家長帳號才能查看收藏！');
@@ -20,7 +70,7 @@ async function loadFavorites() {
         return;
     }
 
-    document.getElementById('user-name-display').innerText = userName || '家長';
+    await loadUserProfile();
 
     try {
         const { data: favorites, error } = await supabaseClient
@@ -104,4 +154,4 @@ async function removeFavorite(centerId) {
     }
 }
 
-loadFavorites();
+loadUserProfile().then(() => loadFavorites());

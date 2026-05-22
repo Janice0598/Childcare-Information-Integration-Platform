@@ -6,61 +6,489 @@
     <title>我的評鑑紀錄 - 托育資訊整合平台</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* 沿用會員中心排版 */
-        .user-layout { display: flex; max-width: 1200px; margin: 40px auto; gap: 30px; padding: 0 20px; }
-        .user-sidebar { width: 250px; background-color: #fff; border: 2px solid #ccc; height: fit-content; }
-        .user-profile-summary { padding: 20px; text-align: center; border-bottom: 2px solid #eee; }
-        .avatar-placeholder { width: 80px; height: 80px; background-color: #ccc; border-radius: 50%; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; color: #666; }
-        .user-menu { list-style: none; padding: 0; margin: 0; }
-        .user-menu li { border-bottom: 1px solid #eee; }
-        .user-menu a { display: block; padding: 15px 20px; text-decoration: none; color: #333; font-weight: bold; }
-        .user-menu a:hover, .user-menu a.active { background-color: #eaeaea; border-left: 4px solid #666; }
-        .user-main { flex-grow: 1; }
-        .welcome-header { margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid #ccc; }
+        /* 會員中心排版 */
+        .user-layout {
+            display: flex;
+            max-width: 1200px;
+            margin: 40px auto;
+            gap: 30px;
+            padding: 0 20px;
+        }
+        .user-sidebar {
+            width: 250px;
+            background-color: #fff;
+            border: 2px solid #ccc;
+            height: fit-content;
+        }
+        .user-profile-summary {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+        }
+        .avatar-placeholder {
+            width: 80px;
+            height: 80px;
+            background-color: #ccc;
+            border-radius: 50%;
+            margin: 0 auto 10px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        .user-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .user-menu li {
+            border-bottom: 1px solid #eee;
+        }
+        .user-menu a {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+        .user-menu a:hover,
+        .user-menu a.active {
+            background-color: #eaeaea;
+            border-left: 4px solid #666;
+        }
+        .user-main {
+            flex-grow: 1;
+        }
+        .welcome-header {
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ccc;
+        }
+        .text-line {
+            color: #666;
+            font-size: 14px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        /* 編輯評價 Modal 樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            max-width: 500px;
+            width: 90%;
+            padding: 25px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .modal-header h3 {
+            margin: 0;
+        }
+        .close-modal {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+        .close-modal:hover {
+            color: #000;
+        }
+        .score-inputs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .score-field label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .score-field select, .score-field textarea {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ccc;
+            font-size: 14px;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-footer button {
+            padding: 8px 20px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <header class="navbar">
-        <a href="index.html" style="text-decoration: none;">
-            <div class="logo-placeholder">托育整合平台</div>
-        </a>
-        <div class="nav-actions">
-            <span>👋 你好，家長</span>
-            <button class="wireframe-btn primary" onclick="logout()">登出</button>
-        </div>
-    </header>
-
-    <div class="user-layout">
-         <aside class="user-sidebar">
-            <div class="user-profile-summary">
-                <div class="avatar-placeholder">大頭貼</div>
-                <!-- 加上 id="user-name-display" -->
-                <h3 id="user-name-display">載入中...</h3>
-                <!-- 加上 id="user-email-display" -->
-                <div id="user-email-display" class="text-line">載入中...</div>
-            </div>
-            <ul class="user-menu">
-                <li><a href="user.html">🏠 會員首頁概況</a></li>
-                <li><a href="#">👤 個人資料設定</a></li>
-                <li><a href="favorite.html">📁 我的收藏清單</a></li>
-                <li><a href="my-reviews.html" class="active">📝 我的評價紀錄</a></li>
-            </ul>
-        </aside>
-
-        <main class="user-main">
-            <div class="welcome-header">
-                <h2>📝 我的評價紀錄</h2>
-                <p class="text-line">您可以在這裡查看、修改或刪除您過去發布的所有機構評價。</p>
-            </div>
-
-            <div id="my-reviews-list" style="display: flex; flex-direction: column; gap: 15px;">
-                <div class="empty-state">⏳ 正在載入您的評價資料...</div>
-            </div>
-        </main>
+<header class="navbar">
+    <a href="index.html" style="text-decoration: none;">
+        <div class="logo-placeholder">托育整合平台</div>
+    </a>
+    <div class="nav-actions">
+        <span id="nav-user-name">👋 你好，家長</span>
+        <a href="index.html" class="wireframe-btn" style="text-decoration:none;">回首頁</a>
+        <button class="wireframe-btn primary" onclick="logout()">登出</button>
     </div>
+</header>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="my-reviews.js"></script>
+<div class="user-layout">
+    <aside class="user-sidebar">
+        <div class="user-profile-summary">
+            <div class="avatar-placeholder">大頭貼</div>
+            <h3 id="user-name-display"></h3>
+            <div id="user-email-display" class="text-line"></div>
+        </div>
+        <ul class="user-menu">
+            <li><a href="user.html">🏠 會員首頁概況</a></li>
+            <li><a href="profile.html">👤 個人資料設定</a></li>
+            <li><a href="favorite.html">📁 我的收藏清單</a></li>
+            <li><a href="my-reviews.html" class="active">📝 我的評價紀錄</a></li>
+        </ul>
+    </aside>
+
+    <main class="user-main">
+        <div class="welcome-header">
+            <h2>📝 我的評價紀錄</h2>
+            <p class="text-line">您可以在這裡查看、修改或刪除您過去發布的所有機構評價。</p>
+        </div>
+
+        <div id="my-reviews-list" style="display: flex; flex-direction: column; gap: 15px;">
+            <div class="empty-state">⏳ 正在載入您的評價資料...</div>
+        </div>
+    </main>
+</div>
+
+<!-- 編輯評價 Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>✏️ 編輯評價</h3>
+            <span class="close-modal" onclick="closeEditModal()">&times;</span>
+        </div>
+        <form id="editReviewForm">
+            <div class="score-inputs">
+                <div class="score-field">
+                    <label>整體評分</label>
+                    <select id="edit-score-overall" required>
+                        <option value="">請選擇</option>
+                        <option value="5">5 ⭐ 非常滿意</option>
+                        <option value="4">4 ⭐ 滿意</option>
+                        <option value="3">3 ⭐ 普通</option>
+                        <option value="2">2 ⭐ 不滿意</option>
+                        <option value="1">1 ⭐ 非常不滿意</option>
+                    </select>
+                </div>
+                <div class="score-field">
+                    <label>師資品質</label>
+                    <select id="edit-score-staff" required>
+                        <option value="">請選擇</option>
+                        <option value="5">5 ⭐ 非常滿意</option>
+                        <option value="4">4 ⭐ 滿意</option>
+                        <option value="3">3 ⭐ 普通</option>
+                        <option value="2">2 ⭐ 不滿意</option>
+                        <option value="1">1 ⭐ 非常不滿意</option>
+                    </select>
+                </div>
+                <div class="score-field">
+                    <label>環境整潔</label>
+                    <select id="edit-score-env" required>
+                        <option value="">請選擇</option>
+                        <option value="5">5 ⭐ 非常滿意</option>
+                        <option value="4">4 ⭐ 滿意</option>
+                        <option value="3">3 ⭐ 普通</option>
+                        <option value="2">2 ⭐ 不滿意</option>
+                        <option value="1">1 ⭐ 非常不滿意</option>
+                    </select>
+                </div>
+                <div class="score-field">
+                    <label>課程活動</label>
+                    <select id="edit-score-curriculum" required>
+                        <option value="">請選擇</option>
+                        <option value="5">5 ⭐ 非常滿意</option>
+                        <option value="4">4 ⭐ 滿意</option>
+                        <option value="3">3 ⭐ 普通</option>
+                        <option value="2">2 ⭐ 不滿意</option>
+                        <option value="1">1 ⭐ 非常不滿意</option>
+                    </select>
+                </div>
+            </div>
+            <div class="score-field">
+                <label>文字評論（選填）</label>
+                <textarea id="edit-review-comment" rows="4" placeholder="分享您的詳細心得..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="wireframe-btn" onclick="closeEditModal()">取消</button>
+                <button type="submit" class="wireframe-btn primary">儲存修改</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // Supabase 設定
+    const SUPABASE_URL = 'https://rfzavcliggzlpkqqcrzr.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // 全域變數：目前要編輯的評價 ID
+    let currentEditReviewId = null;
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'login.html';
+    }
+
+    // 立即顯示快取中的使用者資訊（避免閃爍）
+    function displayCachedUserInfo() {
+        const userName = localStorage.getItem('loggedInUserName');
+        const userEmail = localStorage.getItem('loggedInUserEmail');
+        const nameDisplay = document.getElementById('user-name-display');
+        const emailDisplay = document.getElementById('user-email-display');
+        const navName = document.getElementById('nav-user-name');
+
+        if (nameDisplay) nameDisplay.innerText = userName ? `${userName} 家長` : '';
+        if (emailDisplay) emailDisplay.innerText = (userEmail && userEmail.trim()) ? userEmail : '';
+        if (navName) navName.innerText = userName ? `👋 你好，${userName}` : '👋 你好，家長';
+    }
+
+    // 從後端載入使用者資訊並更新快取
+    async function loadUserProfile() {
+        const userId = localStorage.getItem('loggedInUserId');
+        const userRole = localStorage.getItem('userRole');
+        if (!userId || userRole !== 'parent') {
+            alert('請先登入家長帳號');
+            window.location.href = 'login.html';
+            return null;
+        }
+
+        try {
+            const { data, error } = await supabaseClient
+                .from('parent')
+                .select('name, email')
+                .eq('parent_id', parseInt(userId))
+                .maybeSingle();
+            if (!error && data) {
+                if (data.name) localStorage.setItem('loggedInUserName', data.name);
+                if (data.email) localStorage.setItem('loggedInUserEmail', data.email);
+                // 更新顯示
+                const nameDisplay = document.getElementById('user-name-display');
+                const emailDisplay = document.getElementById('user-email-display');
+                const navName = document.getElementById('nav-user-name');
+                if (nameDisplay) nameDisplay.innerText = `${data.name || '家長'} 家長`;
+                if (emailDisplay) emailDisplay.innerText = (data.email && data.email.trim()) ? data.email : '尚未設定 Email';
+                if (navName) navName.innerText = `👋 你好，${data.name || '家長'}`;
+                return data;
+            }
+        } catch (err) {
+            console.error('載入使用者資料失敗:', err);
+        }
+        return null;
+    }
+
+    // 載入我的評價列表
+    async function loadMyReviews() {
+        const userId = localStorage.getItem('loggedInUserId');
+        if (!userId) {
+            alert('請先登入才能查看評鑑紀錄！');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        await loadUserProfile(); // 確保側欄資訊正確
+
+        try {
+            const { data: reviews, error } = await supabaseClient
+                .from('reviews')
+                .select('*, childcare_center(name)')
+                .eq('parent_id', userId)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            const listContainer = document.getElementById('my-reviews-list');
+            if (!reviews || reviews.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-state" style="padding: 40px; text-align: center; border: 2px dashed #ccc; background: #fff;">
+                        您還沒有發布過任何評價喔！<br><br>
+                        <a href="search.html" class="wireframe-btn primary" style="text-decoration:none;">去尋找機構並留下心得</a>
+                    </div>`;
+                return;
+            }
+
+            listContainer.innerHTML = reviews.map(r => {
+                const centerName = r.childcare_center ? r.childcare_center.name : '未知機構';
+                const date = r.created_at ? r.created_at.slice(0, 10) : '-';
+                return `
+                <div class="result-card" style="flex-direction: column; padding: 20px; border: 2px solid #ccc; background: #fff;" id="review-card-${r.review_id}">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 12px; margin-bottom: 12px;">
+                        <h3 style="margin: 0; color: #333;">🏫 ${escapeHtml(centerName)}</h3>
+                        <span style="font-size:13px; color:#666;">發布日期：${date}</span>
+                    </div>
+                    <div class="score-row" style="display: flex; gap: 20px; margin-bottom: 15px; font-size: 14px; background: #f8fafc; padding: 10px; border-radius: 4px;">
+                        <span>整體 <strong style="color:#f59e0b;">${r.score_overall ?? '-'}</strong></span>
+                        <span>師資 <strong style="color:#f59e0b;">${r.score_staff ?? '-'}</strong></span>
+                        <span>環境 <strong style="color:#f59e0b;">${r.score_environment ?? '-'}</strong></span>
+                        <span>課程 <strong style="color:#f59e0b;">${r.score_curriculum ?? '-'}</strong></span>
+                    </div>
+                    <p style="color: #444; line-height: 1.6; margin-bottom: 15px;">
+                        ${escapeHtml(r.comment) || '<span style="color:#999; font-style:italic;">（無文字評價）</span>'}
+                    </p>
+                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                        <button class="wireframe-btn" onclick="editReview(${r.review_id})">✏️ 編輯評價</button>
+                        <button class="wireframe-btn" style="color: #d9363e; border-color: #d9363e;" onclick="deleteReview(${r.review_id})">🗑️ 刪除評價</button>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch (err) {
+            console.error('載入評價失敗:', err);
+            document.getElementById('my-reviews-list').innerHTML = '<div class="empty-state">載入失敗，請稍後再試。</div>';
+        }
+    }
+
+    // 輔助：避免 XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // 刪除評價
+    async function deleteReview(reviewId) {
+        if (!confirm('確定要刪除這筆評價嗎？刪除後將無法復原喔！')) return;
+        try {
+            const { error } = await supabaseClient
+                .from('reviews')
+                .delete()
+                .eq('review_id', reviewId);
+            if (error) throw error;
+            document.getElementById(`review-card-${reviewId}`).style.display = 'none';
+            alert('✅ 已成功刪除評價！');
+        } catch (err) {
+            console.error('刪除失敗:', err);
+            alert('刪除失敗，請檢查網路連線。');
+        }
+    }
+
+    // 開啟編輯 Modal（先從資料庫載入目前評價內容）
+    async function editReview(reviewId) {
+        currentEditReviewId = reviewId;
+        try {
+            const { data, error } = await supabaseClient
+                .from('reviews')
+                .select('score_overall, score_staff, score_environment, score_curriculum, comment')
+                .eq('review_id', reviewId)
+                .single();
+
+            if (error) throw error;
+
+            // 填入表單
+            document.getElementById('edit-score-overall').value = data.score_overall || '';
+            document.getElementById('edit-score-staff').value = data.score_staff || '';
+            document.getElementById('edit-score-env').value = data.score_environment || '';
+            document.getElementById('edit-score-curriculum').value = data.score_curriculum || '';
+            document.getElementById('edit-review-comment').value = data.comment || '';
+
+            // 顯示 Modal
+            document.getElementById('editModal').style.display = 'flex';
+        } catch (err) {
+            console.error('載入評價資料失敗:', err);
+            alert('無法載入評價內容，請稍後再試。');
+        }
+    }
+
+    // 關閉 Modal
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+        currentEditReviewId = null;
+    }
+
+    // 處理更新評價
+    async function updateReview(event) {
+        event.preventDefault();
+        if (!currentEditReviewId) return;
+
+        const newOverall = parseInt(document.getElementById('edit-score-overall').value);
+        const newStaff = parseInt(document.getElementById('edit-score-staff').value);
+        const newEnv = parseInt(document.getElementById('edit-score-env').value);
+        const newCurriculum = parseInt(document.getElementById('edit-score-curriculum').value);
+        const newComment = document.getElementById('edit-review-comment').value.trim();
+
+        if (!newOverall || !newStaff || !newEnv || !newCurriculum) {
+            alert('請完整填寫所有評分項目！');
+            return;
+        }
+
+        try {
+            const { error } = await supabaseClient
+                .from('reviews')
+                .update({
+                    score_overall: newOverall,
+                    score_staff: newStaff,
+                    score_environment: newEnv,
+                    score_curriculum: newCurriculum,
+                    comment: newComment || null
+                })
+                .eq('review_id', currentEditReviewId);
+
+            if (error) throw error;
+
+            alert('✅ 評價已更新！');
+            closeEditModal();
+            // 重新載入列表以顯示最新內容
+            await loadMyReviews();
+        } catch (err) {
+            console.error('更新失敗:', err);
+            alert('更新失敗，請稍後再試。');
+        }
+    }
+
+    // 綁定表單提交事件
+    document.getElementById('editReviewForm').addEventListener('submit', updateReview);
+
+    // 點擊 Modal 外部關閉（可選）
+    window.onclick = function(event) {
+        const modal = document.getElementById('editModal');
+        if (event.target === modal) {
+            closeEditModal();
+        }
+    };
+
+    // 初始化
+    displayCachedUserInfo();
+    loadMyReviews();
+</script>
 </body>
 </html>

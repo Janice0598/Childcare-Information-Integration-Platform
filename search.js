@@ -6,6 +6,30 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// ======================= 導航列動態更新 =======================
+function updateNavbar() {
+    const container = document.getElementById('nav-actions-container');
+    if (!container) return;
+    const userId = localStorage.getItem('loggedInUserId');
+    const userName = localStorage.getItem('loggedInUserName');
+    if (userId && userName) {
+        container.innerHTML = `
+            <span style="margin-right: 10px;">👋 你好，${userName}</span>
+            <a href="user.html" class="wireframe-btn primary" style="text-decoration: none;">我的會員區</a>
+            <button class="wireframe-btn" onclick="logout()">登出</button>
+        `;
+    } else {
+        container.innerHTML = `<a href="login.html" class="wireframe-btn" style="text-decoration: none;">會員登入</a>`;
+    }
+}
+
+// 全域登出函式
+window.logout = function() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+};
+
+// ======================= 搜尋與篩選邏輯 =======================
 // 套用篩選條件 — 使用後端 /search 多條件 API
 document
   .getElementById("applyFilterBtn")
@@ -28,7 +52,6 @@ document
       if (openTime !== "不限") params.append("open_time", openTime);
       if (closeTime !== "不限") params.append("close_time", closeTime);
 
-      // 使用後端 /search 支援多條件同時篩選
       const url = params.toString()
         ? `${API_BASE}/childcare-centers/search?${params}`
         : `${API_BASE}/childcare-centers`;
@@ -88,10 +111,8 @@ function renderCenterCards(centers) {
       [center.city, center.district, center.streetline]
         .filter(Boolean)
         .join(" ") || "未提供";
-    // ne改的，先放一個空的 img，等拿到照片網址後再塞入 src 顯示
     resultsList.innerHTML += `
             <div class="result-card">
-           
                 <div class="card-image" style="overflow:hidden;">
                     <img id="thumb-${center.center_id}" src="" alt="機構圖片"
                      style="width:100%;height:100%;object-fit:cover;display:none;">
@@ -127,7 +148,7 @@ function renderCenterCards(centers) {
                     </div>
                 </div>
             </div>`;
-    // ne改的，非同步抓取第一張照片
+    // 非同步抓取第一張照片
     fetch(`${API_BASE}/photo/center/${center.center_id}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((result) => {
@@ -201,7 +222,8 @@ document
     if (event.key === "Enter") searchByKeyword();
   });
 
-// 頁面載入時自動搜尋
+// 頁面載入時更新導航列並自動執行搜尋
 window.onload = function () {
+  updateNavbar();                            // 根據登入狀態顯示正確按鈕
   document.getElementById("applyFilterBtn").click();
 };

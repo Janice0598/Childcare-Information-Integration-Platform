@@ -11,16 +11,14 @@
 <body>
 
     <!-- ========================================== -->
-    <!-- 1. 頂部導覽列 (Navbar)                         -->
+    <!-- 1. 頂部導覽列 (Navbar) 動態內容由 JS 產生       -->
     <!-- ========================================== -->
     <header class="navbar">
         <a href="index.html" style="text-decoration: none;">
             <div class="logo-placeholder">托育整合平台</div>
         </a>
-        <div class="nav-actions">
-            <!-- 根據需求，這裡放會員中心或登入的連結 -->
-            <a href="login.html" class="wireframe-btn" style="text-decoration: none;">會員登入</a>
-            <a href="user.html" class="wireframe-btn primary" style="text-decoration: none;">我的會員區</a>
+        <div class="nav-actions" id="nav-actions-container">
+            <!-- 登入/登出按鈕會由 search.js 動態產生 -->
         </div>
     </header>
 
@@ -160,7 +158,7 @@
                     </select>
                 </div>
 
-                <!-- 這裡是你 JS 會把 Supabase 資料塞進來的地方 -->
+                <!-- 這裡是 JS 會把 Supabase 資料塞進來的地方 -->
                 <div id="results-list" class="results-list">
                     <!-- 預設顯示的空狀態 -->
                     <div class="empty-state">
@@ -176,7 +174,7 @@
     <!-- ========================================== -->
     <!-- 引入 Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- 引入你寫好的搜尋邏輯 (確保你把這個檔案也上傳到同一個資料夾) -->
+    <!-- 引入你寫好的搜尋邏輯 -->
     <script src="search.js"></script>
 </body>
 

@@ -5,15 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>托育資訊整合平台</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* 推薦區塊樣式 */
+        .recommend-section {
+            max-width: 1200px;
+            margin: 60px auto 40px;
+            padding: 0 20px;
+        }
+        .recommend-title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            color: #333;
+        }
+        .recommend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        .rec-card {
+            background: #fff;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .rec-card:hover {
+            transform: translateY(-5px);
+        }
+        .rec-img {
+            height: 160px;
+            background-color: #eaeaea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+        }
+        .rec-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .rec-info {
+            padding: 15px;
+        }
+        .rec-info h3 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+        }
+        .rec-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .rec-info a {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
 </head>
 <body>
     <header class="navbar">
         <a href="index.html" style="text-decoration:none;">
             <div class="logo-placeholder">托育整合平台</div>
         </a>
-        <div class="nav-actions">
-            <a href="login.html" class="wireframe-btn" style="text-decoration:none;">會員登入</a>
-            <a href="search.html" class="wireframe-btn primary" style="text-decoration:none;">搜尋機構</a>
+        <div class="nav-actions" id="nav-actions-container">
+            <!-- 動態內容由 JavaScript 產生 -->
         </div>
     </header>
 
@@ -21,10 +85,137 @@
         <div class="search-container">
             <h1 class="search-title">找到最適合的托育機構</h1>
             <div class="search-controls">
-                <input type="text" class="wireframe-input search-bar" placeholder="輸入地區或機構名稱...">
-                <a href="search.html" class="wireframe-btn primary" style="text-decoration:none;">開始搜尋</a>
+                <input type="text" class="wireframe-input search-bar" id="keyword-input" placeholder="輸入地區或機構名稱...">
+                <button class="wireframe-btn primary" id="search-btn" style="text-decoration:none;">開始搜尋</button>
             </div>
         </div>
     </section>
+
+    <!-- 隨機推薦區塊 -->
+    <section class="recommend-section">
+        <h2 class="recommend-title">✨ 為您推薦的熱門機構</h2>
+        <div id="recommend-grid" class="recommend-grid">
+            <div class="loading">載入推薦中...</div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ====================== 設定 ======================
+        const API_BASE = 'http://localhost:3000/api';
+        const SUPABASE_URL = 'https://rfzavcliggzlpkqqcrzr.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ====================== 導航列動態更新 ======================
+        function updateNavbar() {
+            const container = document.getElementById('nav-actions-container');
+            if (!container) return;
+            const userId = localStorage.getItem('loggedInUserId');
+            const userName = localStorage.getItem('loggedInUserName');
+            if (userId && userName) {
+                container.innerHTML = `
+                    <span style="margin-right: 10px;">👋 你好，${userName}</span>
+                    <a href="user.html" class="wireframe-btn primary" style="text-decoration: none;">我的會員區</a>
+                    <button class="wireframe-btn" onclick="logout()">登出</button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <a href="login.html" class="wireframe-btn" style="text-decoration: none;">會員登入</a>
+                    <a href="search.html" class="wireframe-btn primary" style="text-decoration: none;">搜尋機構</a>
+                `;
+            }
+        }
+
+        // 全域登出
+        window.logout = function() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        };
+
+        // ====================== 隨機推薦機構 ======================
+        async function loadRandomRecommendations() {
+            const grid = document.getElementById('recommend-grid');
+            grid.innerHTML = '<div class="loading">⏳ 載入推薦中...</div>';
+            try {
+                // 從後端取得所有機構（或隨機幾筆），這裡先取得全部再隨機選取
+                const response = await fetch(`${API_BASE}/childcare-centers`);
+                if (!response.ok) throw new Error('無法取得機構資料');
+                let centers = await response.json();
+                if (!centers || centers.length === 0) {
+                    grid.innerHTML = '<div class="loading">暫無機構資料</div>';
+                    return;
+                }
+                // 隨機取 4 間不同的機構
+                const shuffled = [...centers];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                const randomCenters = shuffled.slice(0, 4);
+                // 為每間機構取得第一張照片（非同步）
+                const cards = await Promise.all(randomCenters.map(async (center) => {
+                    let photoUrl = null;
+                    try {
+                        const photoRes = await fetch(`${API_BASE}/photo/center/${center.center_id}`);
+                        if (photoRes.ok) {
+                            const photoResult = await photoRes.json();
+                            const firstPhoto = photoResult.data && photoResult.data[0];
+                            if (firstPhoto && firstPhoto.url) photoUrl = firstPhoto.url;
+                        }
+                    } catch(e) { console.warn(e); }
+                    
+                    const address = [center.city, center.district, center.streetline].filter(Boolean).join(' ') || '地址未提供';
+                    const hours = (center.open_time && center.close_time) 
+                        ? `${center.open_time.slice(0,5)} - ${center.close_time.slice(0,5)}` 
+                        : '未提供';
+                    return `
+                        <div class="rec-card">
+                            <div class="rec-img">
+                                ${photoUrl ? `<img src="${photoUrl}" alt="${center.name}">` : '🏢 機構圖片'}
+                            </div>
+                            <div class="rec-info">
+                                <h3>${center.name || '機構名稱'}</h3>
+                                <p>📍 ${address}</p>
+                                <p>🕒 ${hours}</p>
+                                <p>⭐ ${center.operation_type || ''} ${center.category || ''}</p>
+                                <a href="center-detail.html?id=${center.center_id}" class="wireframe-btn" style="display:inline-block; padding:4px 12px; font-size:13px;">查看詳情</a>
+                            </div>
+                        </div>
+                    `;
+                }));
+                grid.innerHTML = cards.join('');
+            } catch (err) {
+                console.error('載入推薦失敗:', err);
+                grid.innerHTML = '<div class="loading">載入推薦失敗，請稍後再試。</div>';
+            }
+        }
+
+        // ====================== 搜尋按鈕行為 ======================
+        function setupSearchButton() {
+            const searchBtn = document.getElementById('search-btn');
+            const keywordInput = document.getElementById('keyword-input');
+            if (!searchBtn) return;
+            const doSearch = () => {
+                const keyword = keywordInput.value.trim();
+                if (keyword) {
+                    window.location.href = `search.html?keyword=${encodeURIComponent(keyword)}`;
+                } else {
+                    window.location.href = 'search.html';
+                }
+            };
+            searchBtn.addEventListener('click', doSearch);
+            keywordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') doSearch();
+            });
+        }
+
+        // ====================== 初始化 ======================
+        window.onload = () => {
+            updateNavbar();
+            loadRandomRecommendations();
+            setupSearchButton();
+        };
+    </script>
 </body>
 </html>

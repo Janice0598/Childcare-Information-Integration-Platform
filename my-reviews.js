@@ -1,7 +1,66 @@
-// 初始化 Supabase
+// my-reviews.js
 const SUPABASE_URL = 'https://rfzavcliggzlpkqqcrzr.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I'; 
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function logout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+}
+
+// 統一載入使用者資訊（與 user.js / favorite.js 相同）
+async function loadUserProfile() {
+    const userId = localStorage.getItem('loggedInUserId');
+    const userRole = localStorage.getItem('userRole');
+
+    if (!userId || userRole !== 'parent') {
+        alert('請先登入家長帳號');
+        window.location.href = 'login.html';
+        return null;
+    }
+
+    let userName = localStorage.getItem('loggedInUserName');
+    let userEmail = localStorage.getItem('loggedInUserEmail');
+
+    if (!userName || !userEmail) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('parent')   // 表格名稱 parent (單數)
+                .select('name, email')
+                .eq('parent_id', parseInt(userId))
+                .maybeSingle();
+
+            if (error) {
+                console.error('查詢 parent 表失敗：', error);
+            }
+            if (data) {
+                userName = data.name;
+                userEmail = data.email;
+                if (userName) localStorage.setItem('loggedInUserName', userName);
+                if (userEmail) localStorage.setItem('loggedInUserEmail', userEmail);
+            }
+        } catch (err) {
+            console.error('載入使用者資料失敗：', err);
+        }
+    }
+
+    userName = userName || '家長';
+    userEmail = (userEmail && userEmail.trim() !== '') ? userEmail : '尚未設定 Email';
+
+    // 更新側邊欄
+    const nameDisplay = document.getElementById('user-name-display');
+    const emailDisplay = document.getElementById('user-email-display');
+    if (nameDisplay) nameDisplay.innerText = userName;
+    if (emailDisplay) emailDisplay.innerText = userEmail;
+
+    // 更新頂部導航列
+    const navUserNameSpan = document.getElementById('nav-user-name');
+    if (navUserNameSpan) {
+        navUserNameSpan.innerText = `👋 你好，${userName}`;
+    }
+
+    return { userName, userEmail };
+}
 
 async function loadMyReviews() {
     const userId = localStorage.getItem('loggedInUserId');
@@ -12,7 +71,8 @@ async function loadMyReviews() {
         return;
     }
 
-    document.getElementById('user-name-display').innerText = localStorage.getItem('loggedInUserName') || '家長';
+    // 載入使用者資訊（確保側邊欄與導航列正確顯示）
+    await loadUserProfile();
 
     try {
         // 從資料庫抓取該名家長的所有評價，順便帶出機構名稱
@@ -20,7 +80,6 @@ async function loadMyReviews() {
             .from('reviews')
             .select('*, childcare_center(name)')
             .eq('parent_id', userId)
-
             .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -51,7 +110,7 @@ async function loadMyReviews() {
                 <div class="score-row" style="display: flex; gap: 20px; margin-bottom: 15px; font-size: 14px; background: #f8fafc; padding: 10px; border-radius: 4px;">
                     <span>整體 <strong style="color:#f59e0b;">${r.score_overall ?? '-'}</strong></span>
                     <span>師資 <strong style="color:#f59e0b;">${r.score_staff ?? '-'}</strong></span>
-                    <span>環境 <strong style="color:#f59e0b;">${r.score_enviroment ?? '-'}</strong></span>
+                    <span>環境 <strong style="color:#f59e0b;">${r.score_environment ?? '-'}</strong></span>
                     <span>課程 <strong style="color:#f59e0b;">${r.score_curriculum ?? '-'}</strong></span>
                 </div>
                 
@@ -73,7 +132,7 @@ async function loadMyReviews() {
     }
 }
 
-// 實作刪除評價 (Delete 功能)
+// 刪除評價
 async function deleteReview(reviewId) {
     if (!confirm('確定要刪除這筆評價嗎？刪除後將無法復原喔！')) return;
     
@@ -85,7 +144,6 @@ async function deleteReview(reviewId) {
 
         if (error) throw error;
         
-        // 刪除成功後，直接讓這張卡片從畫面上消失
         document.getElementById(`review-card-${reviewId}`).style.display = 'none';
         alert('✅ 已成功刪除評價！');
         
@@ -95,15 +153,10 @@ async function deleteReview(reviewId) {
     }
 }
 
-// 預留編輯評價功能 (Update 功能)
+// 編輯評價（預留功能）
 function editReview(reviewId) {
-    alert('進入編輯模式！(未來可在此串接修改表單)');
+    alert('編輯功能開發中！未來可在此修改評價內容。');
 }
 
-function logout() {
-    localStorage.clear();
-    window.location.href = 'login.html';
-}
-
-// 網頁載入時執行
+// 頁面載入
 loadMyReviews();
