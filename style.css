@@ -52,6 +52,13 @@ body {
     cursor: pointer;
     font-weight: bold;
     color: #333;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;      
+    justify-content: center;
+    text-decoration: none;
+    box-sizing: border-box;
+    line-height: 1.5;
 }
 
 .wireframe-btn.primary {

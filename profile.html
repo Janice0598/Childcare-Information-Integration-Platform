@@ -88,17 +88,11 @@
             margin-bottom: 8px;
             color: #333;
         }
-        .form-group input,
-        .form-group select {
+        .form-group input {
             width: 100%;
             padding: 10px;
             border: 2px solid #ccc;
             font-size: 16px;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
         }
         .btn-save {
             background-color: #666;
@@ -128,29 +122,6 @@
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
-        }
-        .recommendation-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .rec-card {
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            padding: 15px;
-        }
-        .rec-card h4 {
-            margin: 0 0 8px 0;
-        }
-        .rec-card .detail {
-            font-size: 13px;
-            color: #666;
-        }
-        .no-data {
-            text-align: center;
-            padding: 30px;
-            color: #999;
         }
     </style>
 </head>
@@ -188,7 +159,6 @@
             <p class="text-line">您可以在這裡修改您的姓名、電子郵件與聯絡電話。</p>
         </div>
 
-        <!-- 基本資料修改區塊（含電話） -->
         <div class="profile-section">
             <h3>📋 基本資料</h3>
             <form id="profile-form">
@@ -207,72 +177,6 @@
                 <button type="submit" class="btn-save">儲存基本資料</button>
                 <div id="basic-message"></div>
             </form>
-        </div>
-
-        <!-- 托育偏好設定區塊（保持原有） -->
-        <div class="profile-section">
-            <h3>✨ 托育偏好設定</h3>
-            <p class="text-line">設定您的偏好後，我們會為您推薦最適合的托育機構，並顯示在下方。</p>
-            <form id="preference-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>偏好行政區</label>
-                        <select id="pref-district">
-                            <option value="">全部區域</option>
-                            <option value="中正區">中正區</option>
-                            <option value="大同區">大同區</option>
-                            <option value="中山區">中山區</option>
-                            <option value="松山區">松山區</option>
-                            <option value="大安區">大安區</option>
-                            <option value="萬華區">萬華區</option>
-                            <option value="信義區">信義區</option>
-                            <option value="士林區">士林區</option>
-                            <option value="北投區">北投區</option>
-                            <option value="內湖區">內湖區</option>
-                            <option value="南港區">南港區</option>
-                            <option value="文山區">文山區</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>機構類別</label>
-                        <select id="pref-category">
-                            <option value="">全部</option>
-                            <option value="托嬰中心">托嬰中心</option>
-                            <option value="幼兒園">幼兒園</option>
-                            <option value="托育資源中心">托育資源中心</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>評鑑等級 (最低要求)</label>
-                        <select id="pref-evaluation">
-                            <option value="">不限</option>
-                            <option value="優等">優等</option>
-                            <option value="甲等">甲等</option>
-                            <option value="乙等">乙等</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>延托服務需求</label>
-                        <select id="pref-extended">
-                            <option value="">不拘</option>
-                            <option value="true">需要延托服務</option>
-                            <option value="false">不需要延托</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" class="btn-save">儲存偏好並更新推薦</button>
-                <div id="pref-message"></div>
-            </form>
-
-            <!-- 推薦機構區塊 -->
-            <div style="margin-top: 30px;">
-                <h4>🎯 為您推薦的機構</h4>
-                <div id="recommend-list" class="recommendation-grid">
-                    <div class="no-data">請先設定偏好並點擊「儲存偏好」</div>
-                </div>
-            </div>
         </div>
     </main>
 </div>
@@ -295,6 +199,7 @@
         const nameDisplay = document.getElementById('user-name-display');
         const emailDisplay = document.getElementById('user-email-display');
         const navName = document.getElementById('nav-user-name');
+        
         if (nameDisplay) nameDisplay.innerText = userName ? `${userName} 家長` : '';
         if (emailDisplay) emailDisplay.innerText = (userEmail && userEmail.trim()) ? userEmail : '';
         if (navName) navName.innerText = userName ? `👋 你好，${userName}` : '👋 你好，家長';
@@ -304,23 +209,27 @@
     async function loadUserData() {
         const userId = localStorage.getItem('loggedInUserId');
         const userRole = localStorage.getItem('userRole');
+        
         if (!userId || userRole !== 'parent') {
             alert('請先登入家長帳號！');
             window.location.href = 'login.html';
             return;
         }
+        
         try {
             const { data, error } = await supabaseClient
                 .from('parent')
                 .select('name, email, phone')
                 .eq('parent_id', parseInt(userId))
                 .maybeSingle();
+                
             if (error) throw error;
+            
             if (data) {
                 document.getElementById('name').value = data.name || '';
                 document.getElementById('email').value = data.email || '';
                 document.getElementById('phone').value = data.phone || '';
-                // 更新 localStorage
+                // 更新 localStorage 緩存
                 if (data.name) localStorage.setItem('loggedInUserName', data.name);
                 if (data.email) localStorage.setItem('loggedInUserEmail', data.email);
                 if (data.phone) localStorage.setItem('loggedInUserPhone', data.phone);
@@ -348,18 +257,23 @@
             showBasicMessage('請填寫有效的電子郵件', 'error');
             return;
         }
+        
         try {
             const updateData = { name: newName, email: newEmail };
             if (newPhone) updateData.phone = newPhone;
+            
             const { error } = await supabaseClient
                 .from('parent')
                 .update(updateData)
                 .eq('parent_id', parseInt(userId));
+                
             if (error) throw error;
-            // 更新 localStorage
+            
+            // 更新 localStorage 緩存
             localStorage.setItem('loggedInUserName', newName);
             localStorage.setItem('loggedInUserEmail', newEmail);
             if (newPhone) localStorage.setItem('loggedInUserPhone', newPhone);
+            
             displayCachedUserInfo();
             showBasicMessage('✅ 基本資料已更新！', 'success');
         } catch (err) {
@@ -374,97 +288,13 @@
         setTimeout(() => div.innerHTML = '', 3000);
     }
 
-    // 偏好設定相關功能（保持原有）
-    function loadPreferencesFromStorage() {
-        const pref = localStorage.getItem('parentPreferences');
-        if (pref) {
-            try {
-                const p = JSON.parse(pref);
-                if (p.district) document.getElementById('pref-district').value = p.district;
-                if (p.category) document.getElementById('pref-category').value = p.category;
-                if (p.evaluation) document.getElementById('pref-evaluation').value = p.evaluation;
-                if (p.extended) document.getElementById('pref-extended').value = p.extended;
-            } catch(e) { console.warn(e); }
-        }
-    }
-
-    async function savePreferences(event) {
-        event.preventDefault();
-        const preferences = {
-            district: document.getElementById('pref-district').value,
-            category: document.getElementById('pref-category').value,
-            evaluation: document.getElementById('pref-evaluation').value,
-            extended: document.getElementById('pref-extended').value
-        };
-        localStorage.setItem('parentPreferences', JSON.stringify(preferences));
-        showPrefMessage('✅ 偏好已儲存，正在更新推薦...', 'success');
-        await updateRecommendations(preferences);
-    }
-
-    async function updateRecommendations(pref) {
-        const listDiv = document.getElementById('recommend-list');
-        listDiv.innerHTML = '<div class="no-data">⏳ 載入推薦中...</div>';
-        let query = supabaseClient.from('childcare_centers').select('*');
-        if (pref.district) query = query.eq('district', pref.district);
-        if (pref.category) query = query.eq('category', pref.category);
-        if (pref.extended !== '') {
-            const extendedBool = pref.extended === 'true';
-            query = query.eq('extended_care', extendedBool);
-        }
-        const { data: centers, error } = await query.limit(6);
-        if (error || !centers || centers.length === 0) {
-            listDiv.innerHTML = '<div class="no-data">沒有符合偏好的機構，試試放寬條件～</div>';
-            return;
-        }
-        let filtered = centers;
-        if (pref.evaluation) {
-            const centerIds = centers.map(c => c.center_id);
-            const { data: evals } = await supabaseClient
-                .from('evaluation_record')
-                .select('center_id, evalution_result')
-                .in('center_id', centerIds)
-                .order('completion_date', { ascending: false });
-            const latestEval = {};
-            if (evals) evals.forEach(e => { if (!latestEval[e.center_id]) latestEval[e.center_id] = e.evalution_result; });
-            filtered = centers.filter(c => latestEval[c.center_id] === pref.evaluation);
-        }
-        if (filtered.length === 0) {
-            listDiv.innerHTML = '<div class="no-data">沒有符合評鑑等級的機構</div>';
-            return;
-        }
-        listDiv.innerHTML = filtered.map(center => `
-            <div class="rec-card">
-                <h4>🏫 ${center.name || '機構名稱'}</h4>
-                <div class="detail">📍 ${center.district || ''} ${center.streetline || ''}</div>
-                <div class="detail">⭐ 評鑑：請查看詳情</div>
-                <div class="detail">📞 ${center.phone || '未提供'}</div>
-                <div style="margin-top:10px;">
-                    <a href="center-detail.html?id=${center.center_id}" class="wireframe-btn" style="text-decoration:none; font-size:12px;">查看詳情</a>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function showPrefMessage(msg, type) {
-        const div = document.getElementById('pref-message');
-        div.innerHTML = `<div class="message ${type}">${msg}</div>`;
-        setTimeout(() => div.innerHTML = '', 3000);
-    }
-
+    // 頁面初始化
     async function init() {
         displayCachedUserInfo();
         await loadUserData();
-        loadPreferencesFromStorage();
-        const pref = localStorage.getItem('parentPreferences');
-        if (pref) {
-            try {
-                await updateRecommendations(JSON.parse(pref));
-            } catch(e) { console.warn(e); }
-        }
     }
 
     document.getElementById('profile-form').addEventListener('submit', saveProfile);
-    document.getElementById('preference-form').addEventListener('submit', savePreferences);
     init();
 </script>
 </body>
