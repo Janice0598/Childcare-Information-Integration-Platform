@@ -170,7 +170,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const centerId = urlParams.get('id');
 
-    const getUserId = () => localStorage.getItem('loggedInUserId');
+    const getUserId = () => sessionStorage.getItem('loggedInUserId');
 
     function formatTime(t) { return t ? t.slice(0,5) : '-'; }
     function formatDate(d) { return d ? d.slice(0,10) : '日期未提供'; }
@@ -223,7 +223,7 @@
 
             // 7. 若已登入為家長，顯示評價表單
             const userId = getUserId();
-            const userRole = localStorage.getItem('userRole');
+            const userRole = sessionStorage.getItem('userRole');
             if (userId && userRole === 'parent') {
                 document.getElementById('review-form').style.display = 'block';
             }
@@ -424,7 +424,7 @@
     // 加入收藏 — 走後端 API (POST /api/favorites)
     async function addToFavorite() {
         const userId = getUserId();
-        const userRole = localStorage.getItem('userRole');
+        const userRole = sessionStorage.getItem('userRole');
 
         if (!userId || userRole !== 'parent') {
             alert('請先登入家長帳號才能收藏！');
