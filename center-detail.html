@@ -160,9 +160,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    const API_BASE = 'http://localhost:3000/api'; 
+    const API_BASE = 'http://localhost:3000/api';
 
-    // Supabase 設定（用於查詢列表）
+    // Supabase 僅保留給照片（已有後端 API）和 reviews 清單讀取
     const SUPABASE_URL = 'https://rfzavcliggzlpkqqcrzr.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -187,7 +187,7 @@
             return;
         }
         try {
-            // 1. 機構基本資料：後端有此 API，正常抓取
+            // 1. 機構基本資料
             const res = await fetch(`${API_BASE}/childcare-centers/${centerId}`);
             if (!res.ok) throw new Error('找不到該機構');
             const centerResult = await res.json();
@@ -206,53 +206,19 @@
             document.getElementById('center-rep').innerText = center.representative || '-';
             document.getElementById('center-qual').innerText = center.qualification || '-';
 
-            // 📖 2. 招生狀態 (退回用 Supabase 撈取)
-            const { data: enrollment } = await supabaseClient.from('enrollment_status').select('*').eq('center_id', centerId).maybeSingle();
-            if (enrollment) {
-                document.getElementById('enroll-accepting').innerText = enrollment.is_accepting ? '✅ 開放招生中' : '❌ 暫停招生';
-                document.getElementById('enroll-waitlist').innerText = enrollment.waitlist_count ?? '-';
-                document.getElementById('enroll-fee').innerText = enrollment.monthly_fee ? `NT$ ${enrollment.monthly_fee.toLocaleString()}` : '-';
-                document.getElementById('enroll-hours').innerText = enrollment.service_hour ? `${enrollment.service_hour} 小時` : '-';
-                document.getElementById('enroll-extended').innerText = enrollment.extended_care ? '✅ 提供' : '❌ 不提供';
-                document.getElementById('enroll-updated').innerText = formatDate(enrollment.updated_at);
-            }
+            // 2. 招生狀態 — 走後端 API
+            await loadEnrollmentStatus();
 
-            // 📖 3. 設施照片 (退回用 Supabase 撈取)
-            const { data: photos } = await supabaseClient.from('photo').select('*').eq('center_id', centerId);
-            document.getElementById('photo-grid').innerHTML = (photos && photos.length > 0)
-                ? photos.map(p => `<div class="photo-item"><img src="${p.url}" alt="${p.caption || '設施照片'}"></div>`).join('')
-                : '<div class="photo-item" style="grid-column:1/-1;">尚無設施照片</div>';
+            // 3. 設施照片 — 走後端 API
+            await loadPhotos();
 
-            // 📖 4. 師資 (退回用 Supabase 撈取)
-            const { data: staff } = await supabaseClient.from('staff').select('*').eq('center_id', centerId);
-            const staffTbody = document.getElementById('staff-tbody');
-            if (staff && staff.length) {
-                staffTbody.innerHTML = staff.map(s => `<tr>
-                    <td>${escapeHtml(s.name) || '-'}</td>
-                    <td>${escapeHtml(s.role) || '-'}</td>
-                    <td>${escapeHtml(s.qualification) || '-'}</td>
-                    <td style="color:#666;">${escapeHtml(s.biography) || '-'}</td>
-                </tr>`).join('');
-            } else {
-                staffTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;padding:20px;">尚無師資資料</td></tr>';
-            }
+            // 4. 師資 — 走後端 API
+            await loadStaff();
 
-            // 📖 5. 評鑑紀錄 (退回用 Supabase 撈取)
-            const { data: evals } = await supabaseClient.from('evaluation_record').select('*').eq('center_id', centerId).order('completion_date', { ascending: false });
-            const evalDiv = document.getElementById('evaluation-content');
-            if (evals && evals.length) {
-                evalDiv.innerHTML = evals.map(e => `
-                    <div class="info-row">
-                        <span class="info-label">📅 ${e.evaluation_academic_year || '-'} 學年度</span>
-                        <span class="info-value">結果：${e.evalution_result || '-'}${e.completion_date ? `（完成日期：${formatDate(e.completion_date)}）` : ''}</span>
-                    </div>
-                    ${e.non_compliance_details ? `<div style="padding:8px 0;font-size:13px;color:#e74c3c;border-bottom:1px solid #f0f0f0;">⚠️ 缺失說明：${escapeHtml(e.non_compliance_details)}</div>` : ''}
-                `).join('');
-            } else {
-                evalDiv.innerHTML = '<p style="color:#999;text-align:center;padding:10px;">尚無評鑑紀錄</p>';
-            }
+            // 5. 評鑑紀錄 — 走後端 API
+            await loadEvaluations();
 
-            // 6. 家長評價
+            // 6. 家長評價（reviews 後端只有 GET by id，讀取列表仍用 Supabase）
             await loadReviews();
 
             // 7. 若已登入為家長，顯示評價表單
@@ -271,7 +237,99 @@
         }
     }
 
-    // 📖 讀取評價：(使用 Supabase 抓取，避開後端缺少的 GET 路由)
+    // ✅ 招生狀態 — 走後端 API (GET /api/enrollment-status/center/:centerId)
+    async function loadEnrollmentStatus() {
+        try {
+            const res = await fetch(`${API_BASE}/enrollment-status/center/${centerId}`);
+            if (!res.ok) throw new Error('無法取得招生狀態');
+            const data = await res.json();
+            // 後端回傳陣列，取第一筆
+            const enrollment = Array.isArray(data) ? data[0] : data;
+
+            if (enrollment) {
+                document.getElementById('enroll-accepting').innerText = enrollment.is_accepting ? '✅ 開放招生中' : '❌ 暫停招生';
+                document.getElementById('enroll-waitlist').innerText = enrollment.waitlist_count ?? '-';
+                document.getElementById('enroll-fee').innerText = enrollment.monthly_fee ? `NT$ ${enrollment.monthly_fee.toLocaleString()}` : '-';
+                document.getElementById('enroll-hours').innerText = enrollment.service_hour ? `${enrollment.service_hour} 小時` : '-';
+                document.getElementById('enroll-extended').innerText = enrollment.extended_care ? '✅ 提供' : '❌ 不提供';
+                document.getElementById('enroll-updated').innerText = formatDate(enrollment.updated_at);
+            } else {
+                ['enroll-accepting','enroll-waitlist','enroll-fee','enroll-hours','enroll-extended','enroll-updated']
+                    .forEach(id => document.getElementById(id).innerText = '尚無資料');
+            }
+        } catch (e) {
+            console.error('招生狀態載入失敗', e);
+            document.getElementById('enroll-accepting').innerText = '載入失敗';
+        }
+    }
+
+    // ✅ 設施照片 — 走後端 API (GET /api/photo/center/:center_id)
+    async function loadPhotos() {
+        try {
+            const res = await fetch(`${API_BASE}/photo/center/${centerId}`);
+            if (!res.ok) throw new Error('無法取得照片');
+            const result = await res.json();
+            const photos = result.data;
+
+            document.getElementById('photo-grid').innerHTML = (photos && photos.length > 0)
+                ? photos.map(p => `<div class="photo-item"><img src="${p.url}" alt="${escapeHtml(p.caption) || '設施照片'}"></div>`).join('')
+                : '<div class="photo-item" style="grid-column:1/-1;">尚無設施照片</div>';
+        } catch (e) {
+            console.error('照片載入失敗', e);
+            document.getElementById('photo-grid').innerHTML = '<div class="photo-item" style="grid-column:1/-1;">照片載入失敗</div>';
+        }
+    }
+
+    // ✅ 師資列表 — 走後端 API (GET /api/staff/center/:centerId)
+    async function loadStaff() {
+        const staffTbody = document.getElementById('staff-tbody');
+        try {
+            const res = await fetch(`${API_BASE}/staff/center/${centerId}`);
+            if (!res.ok) throw new Error('無法取得師資資料');
+            const staff = await res.json();
+
+            if (staff && staff.length) {
+                staffTbody.innerHTML = staff.map(s => `<tr>
+                    <td>${escapeHtml(s.name) || '-'}</td>
+                    <td>${escapeHtml(s.role) || '-'}</td>
+                    <td>${escapeHtml(s.qualification) || '-'}</td>
+                    <td style="color:#666;">${escapeHtml(s.biography) || '-'}</td>
+                </tr>`).join('');
+            } else {
+                staffTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;padding:20px;">尚無師資資料</td></tr>';
+            }
+        } catch (e) {
+            console.error('師資載入失敗', e);
+            staffTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#e74c3c;padding:20px;">師資資料載入失敗</td></tr>';
+        }
+    }
+
+    // ✅ 評鑑紀錄 — 走後端 API (GET /api/government-evaluations/center/:centerId)
+    async function loadEvaluations() {
+        const evalDiv = document.getElementById('evaluation-content');
+        try {
+            const res = await fetch(`${API_BASE}/government-evaluations/center/${centerId}`);
+            if (!res.ok) throw new Error('無法取得評鑑紀錄');
+            const evals = await res.json();
+
+            if (evals && evals.length) {
+                evalDiv.innerHTML = evals.map(e => `
+                    <div class="info-row">
+                        <span class="info-label">📅 ${escapeHtml(e.evaluation_academic_year) || '-'} 學年度</span>
+                        <span class="info-value">結果：${escapeHtml(e.evalution_result) || '-'}${e.completion_date ? `（完成日期：${formatDate(e.completion_date)}）` : ''}</span>
+                    </div>
+                    ${e.non_compliance_details ? `<div style="padding:8px 0;font-size:13px;color:#e74c3c;border-bottom:1px solid #f0f0f0;">⚠️ 缺失說明：${escapeHtml(e.non_compliance_details)}</div>` : ''}
+                `).join('');
+            } else {
+                evalDiv.innerHTML = '<p style="color:#999;text-align:center;padding:10px;">尚無評鑑紀錄</p>';
+            }
+        } catch (e) {
+            console.error('評鑑載入失敗', e);
+            evalDiv.innerHTML = '<p style="color:#e74c3c;text-align:center;padding:10px;">評鑑資料載入失敗</p>';
+        }
+    }
+
+    // 家長評價列表（reviews 後端無 GET by center_id，仍用 Supabase）
     async function loadReviews() {
         try {
             const { data: reviews } = await supabaseClient
@@ -306,7 +364,7 @@
         }
     }
 
-    // 📤 送出評價：呼叫 Node.js 後端 API (POST /api/reviews)，藉此觸發算分邏輯
+    // 送出評價 — 走後端 API (POST /api/reviews)
     async function submitReview() {
         const userId = getUserId();
         const resultDiv = document.getElementById('review-submit-result');
@@ -333,7 +391,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    parent_id: parseInt(userId), // 💡 沒用 Token，手動將 parent_id 交給後端
+                    parent_id: parseInt(userId),
                     center_id: parseInt(centerId),
                     score_staff: scoreStaff,
                     score_environment: scoreEnv,
@@ -350,13 +408,11 @@
             resultDiv.innerText = '✅ 評價送出成功！';
             resultDiv.style.color = '#16a34a';
 
-            // 清空表單
             document.getElementById('score-staff').value = '';
             document.getElementById('score-env').value = '';
             document.getElementById('score-curriculum').value = '';
             document.getElementById('review-comment').value = '';
 
-            // 重新載入評價列表
             await loadReviews();
         } catch (err) {
             console.error('送出評價失敗:', err);
@@ -365,11 +421,11 @@
         }
     }
 
-    // 💖 加入收藏：呼叫 Node.js 後端 API (POST /api/favorites)
+    // 加入收藏 — 走後端 API (POST /api/favorites)
     async function addToFavorite() {
         const userId = getUserId();
         const userRole = localStorage.getItem('userRole');
-        
+
         if (!userId || userRole !== 'parent') {
             alert('請先登入家長帳號才能收藏！');
             window.location.href = 'login.html';
@@ -377,18 +433,18 @@
         }
 
         try {
-            const response = await fetch(`${API_BASE}/favorites`, { // 依據你後端 app.js，路徑應為 /api/favorites
+            const response = await fetch(`${API_BASE}/favorites`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    parent_id: parseInt(userId), // 💡 沒用 Token，手動將 parent_id 交給後端
+                    parent_id: parseInt(userId),
                     center_id: parseInt(centerId)
                 })
             });
 
             if (!response.ok) {
                 const errData = await response.json();
-                if (errData.error && errData.error.includes('重複') || response.status === 409) {
+                if (response.status === 409 || (errData.error && errData.error.includes('重複'))) {
                     throw new Error('這間機構已在您的收藏清單中！');
                 }
                 throw new Error('收藏失敗，請稍後再試。');
