@@ -33,7 +33,6 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             return;
         }
 
-        console.log('🔍 登入回傳資料:', JSON.stringify(result.data)); // ← 加這行
 
         sessionStorage
 
