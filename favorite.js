@@ -124,7 +124,7 @@ function renderFavoriteCard(center, favItemId) {
         </div>
         <p class="text-line highlight">📍 ${address}</p>
         <p class="text-line">🕐 營業時間：${hours}</p>
-        <p class="text-line">👩‍🏫 師生比：1:${center.teacher_student_ratio || "未提供"} ｜ 總容量：${center.total_capacity || 0} 人</p>
+        <p class="text-line">👩‍🏫 師生比：1:${center.teacher_student_ratio ? Math.round(1 / center.teacher_student_ratio) : "未提供"} ｜ 總容量：${center.total_capacity || 0} 人</p>
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto; padding-top:10px;">
           <a href="center-detail.html?id=${center.center_id}" class="wireframe-btn"
             style="text-decoration:none; font-size:14px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;">
