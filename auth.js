@@ -33,8 +33,16 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             return;
         }
 
+        sessionStorage.setItem('authToken', result.token);
+        sessionStorage.setItem('userRole', selectedRole);
 
-        sessionStorage
+        if (selectedRole === 'parent') {
+            sessionStorage.setItem('loggedInUserName', result.data.name);
+            sessionStorage.setItem('loggedInUserId', result.data.parent_id);
+        } else {
+            sessionStorage.setItem('loggedInUserName', result.data.username);
+            sessionStorage.setItem('loggedInUserId', result.data.centeraccount_id);
+        }
 
         alert(`登入成功！即將跳轉至${selectedRole === 'parent' ? '會員中心' : '管理員後台'}...`);
         window.location.href = targetPage;
