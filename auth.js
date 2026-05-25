@@ -1,45 +1,53 @@
-// admin.js
-const SUPABASE_URL = 'https://rfzavcliggzlpkqqcrzr.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// auth.js
+const API_BASE = 'http://localhost:3000/api';
 
-async function loadAdminData() {
-    const adminId = sessionStorage.getItem('loggedInUserId');
+document.getElementById('loginForm').addEventListener('submit', async function (event) {
+    event.preventDefault();
 
-    if (!adminId) {
-        alert('請先登入管理員帳號！');
-        window.location.href = 'login.html';
-        return;
+    const selectedRole = document.getElementById('role').value;
+    const inputEmail = document.getElementById('email').value;
+    const inputPassword = document.getElementById('password').value;
+
+    let apiUrl = '';
+    let targetPage = '';
+
+    if (selectedRole === 'parent') {
+        apiUrl = `${API_BASE}/parent/login`;
+        targetPage = 'user.html';
+    } else if (selectedRole === 'admin') {
+        apiUrl = `${API_BASE}/admin/login`;
+        targetPage = 'admin.html';
     }
 
     try {
-        const { data: adminData, error: adminError } = await supabaseClient
-            .from('administrator')
-            .select('*')
-            .eq('admin_id', adminId)
-            .single();
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: inputEmail, password: inputPassword })
+        });
 
-        if (adminError) throw adminError;
+        const result = await response.json();
 
-        document.getElementById('admin-name-display').innerText = `👤 ${adminData.name} 您好`;
-
-        if (adminData.center_id) {
-            const { data: centerData, error: centerError } = await supabaseClient
-                .from('childcare_center')
-                .select('name')
-                .eq('center_id', adminData.center_id)
-                .single();
-
-            if (!centerError && centerData) {
-                document.getElementById('admin-center-display').innerHTML = `目前管理機構：<strong>${centerData.name}</strong>`;
-            }
-        } else {
-            document.getElementById('admin-center-display').innerHTML = `目前管理機構：<strong>尚未綁定機構</strong>`;
+        if (!response.ok || !result.success) {
+            alert('登入失敗：' + (result.error || '帳號或密碼錯誤'));
+            return;
         }
 
-    } catch (error) {
-        console.error('讀取管理員資料失敗：', error);
-    }
-}
+        sessionStorage.setItem('authToken', result.token);
+        sessionStorage.setItem('loggedInUserName', result.data.name);
+        sessionStorage.setItem('userRole', selectedRole);
 
-loadAdminData();
+        if (selectedRole === 'parent') {
+            sessionStorage.setItem('loggedInUserId', result.data.parent_id);
+        } else {
+            sessionStorage.setItem('loggedInUserId', result.data.centeraccount_id);
+        }
+
+        alert(`登入成功！即將跳轉至${selectedRole === 'parent' ? '會員中心' : '管理員後台'}...`);
+        window.location.href = targetPage;
+
+    } catch (err) {
+        console.error('系統發生錯誤:', err);
+        alert('無法連線到伺服器，請確認後端伺服器是否開啟。');
+    }
+});
