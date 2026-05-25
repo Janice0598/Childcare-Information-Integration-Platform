@@ -115,7 +115,7 @@ function renderCenterCards(centers) {
           </div>
           <p class="text-line highlight">📍 ${address}</p>
           <p class="text-line">🕐 營業時間：${hours}</p>
-          <p class="text-line">👩‍🏫 師生比：1:${center.teacher_student_ratio || "未提供"} ｜ 總容量：${center.total_capacity || 0} 人</p>
+          <p class="text-line">👩‍🏫 師生比：1:${center.teacher_student_ratio ? Math.round(1 / center.teacher_student_ratio) : "未提供"} ｜ 總容量：${center.total_capacity || 0} 人</p>
           <div class="card-actions" style="display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:15px;">
             <a href="center-detail.html?id=${center.center_id}" class="wireframe-btn"
               style="text-decoration:none;height:42px;padding:0 16px;display:inline-flex;align-items:center;">查看詳情</a>
