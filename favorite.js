@@ -26,7 +26,7 @@ async function loadUserProfile() {
   if (!userName || !userEmail) {
     try {
       const { data, error } = await supabaseClient
-        .from("parent") // ✅ 表名為 parent
+        .from("parent")
         .select("name, email")
         .eq("parent_id", parseInt(userId))
         .maybeSingle();
@@ -101,7 +101,8 @@ async function loadFavorites() {
       );
       if (response.ok) {
         const center = await response.json();
-        renderFavoriteCard(center);
+        // 把 fav_item_id 一起傳進去，供刪除使用
+        renderFavoriteCard(center, item.fav_item_id);
       }
     }
   } catch (err) {
@@ -111,7 +112,7 @@ async function loadFavorites() {
   }
 }
 
-function renderFavoriteCard(center) {
+function renderFavoriteCard(center, favItemId) {
   const listContainer = document.getElementById("favorite-list");
   const address =
     [center.city, center.district, center.streetline]
@@ -152,7 +153,7 @@ function renderFavoriteCard(center) {
     </a>
     <button class="wireframe-btn" 
             style="background-color:#ef4444; color:white; border:1px solid #ef4444; cursor:pointer; font-size:14px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;"
-            onclick="removeFavorite(${center.center_id})">
+            onclick="removeFavorite(${center.center_id}, ${favItemId})">
         🗑️ 移除收藏
     </button>
 </div>
@@ -178,17 +179,19 @@ function renderFavoriteCard(center) {
     .catch(() => {});
 }
 
-async function removeFavorite(centerId) {
-  const userId = localStorage.getItem("loggedInUserId");
+// ✅ 改成走後端 API (DELETE /api/favorites/:fav_item_id)
+async function removeFavorite(centerId, favItemId) {
   if (!confirm("確定要將這間機構從收藏中移除嗎？")) return;
   try {
-    const { error } = await supabaseClient
-      .from("favorite_item")
-      .delete()
-      .eq("parent_id", parseInt(userId))
-      .eq("center_id", centerId);
+    const response = await fetch(`${API_BASE}/favorites/${favItemId}`, {
+      method: "DELETE",
+    });
 
-    if (error) throw error;
+    if (!response.ok && response.status !== 204) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || "刪除失敗");
+    }
+
     document.getElementById(`fav-card-${centerId}`).style.display = "none";
     alert("✅ 已成功移除收藏！");
   } catch (err) {
