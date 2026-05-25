@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>機構比較 - 托育資訊整合平台</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ── 頁面結構 ── */
+        .compare-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .compare-title { margin-bottom: 8px; color: #333; }
+        .compare-subtitle { color: #666; font-size: 14px; margin-bottom: 30px; }
+
+        /* ── 選擇區塊 ── */
+        .selector-grid {
+            display: grid;
+            grid-template-columns: 1fr 60px 1fr;
+            gap: 0;
+            margin-bottom: 30px;
+            align-items: start;
+        }
+        .selector-slot {
+            background: #fff;
+            border: 2px solid #ccc;
+            padding: 20px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+        }
+        .selector-slot h3 { margin-bottom: 12px; font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        .vs-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #333;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 180px;
+        }
+
+        /* 搜尋輸入 */
+        .slot-search { display: flex; gap: 8px; margin-bottom: 12px; }
+        .slot-search input { flex: 1; padding: 8px 12px; border: 2px solid #ccc; font-size: 14px; }
+        .slot-search button { padding: 8px 14px; border: 2px solid #666; background: #fff; cursor: pointer; font-weight: bold; font-size: 13px; white-space: nowrap; }
+        .slot-search button:hover { background: #eee; }
+
+        /* 搜尋下拉結果 */
+        .slot-dropdown { position: relative; }
+        .slot-results {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            background: #fff;
+            border: 2px solid #666;
+            border-top: none;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+        .slot-results.open { display: block; }
+        .slot-result-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            border-bottom: 1px solid #eee;
+        }
+        .slot-result-item:hover { background: #f5f5f5; }
+        .slot-result-item .item-name { font-weight: bold; color: #333; }
+        .slot-result-item .item-meta { color: #888; font-size: 12px; margin-top: 2px; }
+
+        /* 已選機構卡 */
+        .selected-center {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 12px;
+            flex: 1;
+        }
+        .selected-center-info { flex: 1; }
+        .selected-center-name { font-weight: bold; color: #333; font-size: 15px; }
+        .selected-center-meta { color: #666; font-size: 13px; margin-top: 3px; }
+        .remove-btn {
+            padding: 4px 10px;
+            border: 2px solid #ef4444;
+            background: #fff;
+            color: #ef4444;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .remove-btn:hover { background: #fef2f2; }
+        .empty-slot {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            font-size: 14px;
+            border: 2px dashed #ddd;
+            padding: 20px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* ── 比較按鈕 ── */
+        .compare-action { text-align: center; margin-bottom: 30px; }
+        .compare-btn {
+            padding: 14px 50px;
+            background: #333;
+            color: #fff;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: background 0.2s;
+        }
+        .compare-btn:hover { background: #555; }
+        .compare-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* ── 比較結果表格 ── */
+        .compare-result { display: none; }
+        .compare-result.show { display: block; }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border: 2px solid #ccc;
+        }
+        .compare-table th, .compare-table td {
+            padding: 14px 18px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            vertical-align: top;
+        }
+        .compare-table th {
+            background: #f9f9f9;
+            color: #555;
+            font-weight: bold;
+            width: 160px;
+            white-space: nowrap;
+            border-right: 1px solid #eee;
+        }
+        .compare-table td { width: calc((100% - 160px) / 2); }
+        .compare-table td:last-child { border-left: 1px solid #eee; }
+        .compare-table tr:last-child th,
+        .compare-table tr:last-child td { border-bottom: none; }
+
+        /* 表頭行 */
+        .compare-table .header-row th { background: #333; color: #fff; }
+        .compare-table .header-row td {
+            background: #444;
+            color: #fff;
+            font-weight: bold;
+            font-size: 15px;
+            text-align: center;
+        }
+        .compare-table .header-row td.left-col { background: #333; }
+        .compare-table .header-row td.right-col { background: #555; }
+
+        /* 分類標題行 */
+        .compare-table .section-row th {
+            background: #eaeaea;
+            color: #333;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 8px 18px;
+        }
+        .compare-table .section-row td {
+            background: #eaeaea;
+            padding: 8px 18px;
+        }
+
+        /* 優/劣標記 */
+        .tag-better {
+            display: inline-block;
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 6px;
+        }
+        .tag-worse {
+            display: inline-block;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 6px;
+        }
+
+        /* 評鑑等級對應色 */
+        .eval-A { color: #065f46; font-weight: bold; }
+        .eval-B { color: #92400e; font-weight: bold; }
+        .eval-C { color: #991b1b; font-weight: bold; }
+
+        /* 載入狀態 */
+        .loading-row td { text-align: center; padding: 40px; color: #999; }
+    </style>
+</head>
+<body>
+
+<header class="navbar">
+    <a href="index.html" style="text-decoration:none;">
+        <div class="logo-placeholder">托育整合平台</div>
+    </a>
+    <div class="nav-actions" id="nav-actions-container"></div>
+</header>
+
+<div class="compare-container">
+    <h1 class="compare-title">🔍 機構比較</h1>
+    <p class="compare-subtitle">搜尋並選取兩間托育機構，即可並排比較所有關鍵資訊。</p>
+
+    <!-- 選擇區塊 -->
+    <div class="selector-grid">
+
+        <!-- 左邊槽 -->
+        <div class="selector-slot">
+            <h3>機構 A</h3>
+            <div class="slot-search">
+                <input type="text" id="search-a" placeholder="輸入機構名稱搜尋..." autocomplete="off">
+                <button onclick="searchCenter('a')">搜尋</button>
+            </div>
+            <div class="slot-dropdown">
+                <div class="slot-results" id="results-a"></div>
+            </div>
+            <div id="selected-a" class="empty-slot">尚未選擇機構<br>請在上方搜尋</div>
+        </div>
+
+        <!-- VS 分隔 -->
+        <div class="vs-divider">VS</div>
+
+        <!-- 右邊槽 -->
+        <div class="selector-slot">
+            <h3>機構 B</h3>
+            <div class="slot-search">
+                <input type="text" id="search-b" placeholder="輸入機構名稱搜尋..." autocomplete="off">
+                <button onclick="searchCenter('b')">搜尋</button>
+            </div>
+            <div class="slot-dropdown">
+                <div class="slot-results" id="results-b"></div>
+            </div>
+            <div id="selected-b" class="empty-slot">尚未選擇機構<br>請在上方搜尋</div>
+        </div>
+
+    </div>
+
+    <!-- 比較按鈕 -->
+    <div class="compare-action">
+        <button class="compare-btn" id="compare-btn" onclick="runCompare()" disabled>
+            選擇兩間機構後開始比較
+        </button>
+    </div>
+
+    <!-- 比較結果 -->
+    <div class="compare-result" id="compare-result">
+        <table class="compare-table" id="compare-table">
+            <tbody id="compare-tbody">
+                <tr class="loading-row"><td colspan="3">⏳ 載入比較資料中...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const API_BASE = 'http://localhost:3000/api';
+const SUPABASE_URL = 'https://rfzavcliggzlpkqqcrzr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// 選取狀態
+let selectedA = null;
+let selectedB = null;
+let allCenters = [];
+
+// ── 導覽列 ──
+function updateNavbar() {
+    const container = document.getElementById('nav-actions-container');
+    if (!container) return;
+    const userId = sessionStorage.getItem('loggedInUserId');
+    const userName = sessionStorage.getItem('loggedInUserName');
+    if (userId && userName) {
+        container.innerHTML = `
+            <span style="margin-right:10px;">👋 你好，${userName}</span>
+            <a href="user.html" class="wireframe-btn primary" style="text-decoration:none;">我的會員區</a>
+            <button class="wireframe-btn" onclick="logout()">登出</button>`;
+    } else {
+        container.innerHTML = `<a href="login.html" class="wireframe-btn" style="text-decoration:none;">會員登入</a>`;
+    }
+}
+window.logout = function() { sessionStorage.clear(); window.location.href = 'login.html'; };
+
+// ── 載入所有機構（供搜尋用）──
+async function loadAllCenters() {
+    try {
+        const res = await fetch(`${API_BASE}/childcare-centers`);
+        if (res.ok) allCenters = await res.json();
+    } catch(e) { console.error('載入機構列表失敗', e); }
+}
+
+// ── 搜尋機構 ──
+function searchCenter(slot) {
+    const keyword = document.getElementById(`search-${slot}`).value.trim();
+    const resultsDiv = document.getElementById(`results-${slot}`);
+
+    if (!keyword) {
+        resultsDiv.classList.remove('open');
+        return;
+    }
+
+    const filtered = allCenters.filter(c =>
+        c.name && c.name.includes(keyword)
+    ).slice(0, 8);
+
+    if (filtered.length === 0) {
+        resultsDiv.innerHTML = '<div class="slot-result-item"><span class="item-name" style="color:#999;">找不到符合的機構</span></div>';
+    } else {
+        resultsDiv.innerHTML = filtered.map(c => `
+            <div class="slot-result-item" onclick="selectCenter('${slot}', ${c.center_id})">
+                <div class="item-name">${c.name}</div>
+                <div class="item-meta">${c.district || ''} ${c.category || ''} ${c.operation_type || ''}</div>
+            </div>
+        `).join('');
+    }
+    resultsDiv.classList.add('open');
+}
+
+// ── 選取機構 ──
+function selectCenter(slot, centerId) {
+    const center = allCenters.find(c => c.center_id === centerId);
+    if (!center) return;
+
+    if (slot === 'a') {
+        selectedA = center;
+        renderSelectedCard('a', center);
+    } else {
+        selectedB = center;
+        renderSelectedCard('b', center);
+    }
+
+    // 關閉下拉
+    document.getElementById(`results-${slot}`).classList.remove('open');
+    document.getElementById(`search-${slot}`).value = '';
+
+    // 更新比較按鈕
+    updateCompareBtn();
+
+    // 若已有比較結果，自動重新比較
+    const resultDiv = document.getElementById('compare-result');
+    if (resultDiv.classList.contains('show') && selectedA && selectedB) {
+        runCompare();
+    }
+}
+
+// ── 渲染已選卡片 ──
+function renderSelectedCard(slot, center) {
+    const address = [center.district, center.streetline].filter(Boolean).join(' ') || '地址未提供';
+    document.getElementById(`selected-${slot}`).outerHTML = `
+        <div id="selected-${slot}" class="selected-center">
+            <div class="selected-center-info">
+                <div class="selected-center-name">${center.name}</div>
+                <div class="selected-center-meta">📍 ${address} ｜ ${center.category || ''} ${center.operation_type || ''}</div>
+            </div>
+            <button class="remove-btn" onclick="removeCenter('${slot}')">✕ 移除</button>
+        </div>
+    `;
+}
+
+// ── 移除機構 ──
+function removeCenter(slot) {
+    if (slot === 'a') {
+        selectedA = null;
+        document.getElementById('selected-a').outerHTML = `<div id="selected-a" class="empty-slot">尚未選擇機構<br>請在上方搜尋</div>`;
+    } else {
+        selectedB = null;
+        document.getElementById('selected-b').outerHTML = `<div id="selected-b" class="empty-slot">尚未選擇機構<br>請在上方搜尋</div>`;
+    }
+    updateCompareBtn();
+    document.getElementById('compare-result').classList.remove('show');
+}
+
+// ── 更新比較按鈕狀態 ──
+function updateCompareBtn() {
+    const btn = document.getElementById('compare-btn');
+    if (selectedA && selectedB) {
+        btn.disabled = false;
+        btn.textContent = '▶ 開始比較';
+    } else if (selectedA || selectedB) {
+        btn.disabled = true;
+        btn.textContent = '請再選擇一間機構';
+    } else {
+        btn.disabled = true;
+        btn.textContent = '選擇兩間機構後開始比較';
+    }
+}
+
+// ── 執行比較 ──
+async function runCompare() {
+    if (!selectedA || !selectedB) return;
+
+    const resultDiv = document.getElementById('compare-result');
+    const tbody = document.getElementById('compare-tbody');
+    resultDiv.classList.add('show');
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="3">⏳ 載入比較資料中...</td></tr>';
+
+    // 捲動到比較結果
+    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    try {
+        // 同時抓取兩間機構的詳細資料（含招生狀態、評鑑）
+        const [
+            detailA, detailB,
+            enrollA, enrollB,
+            evalA, evalB,
+            staffA, staffB
+        ] = await Promise.all([
+            fetch(`${API_BASE}/childcare-centers/${selectedA.center_id}`).then(r => r.json()),
+            fetch(`${API_BASE}/childcare-centers/${selectedB.center_id}`).then(r => r.json()),
+            fetch(`${API_BASE}/enrollment-status/center/${selectedA.center_id}`).then(r => r.json()).catch(() => []),
+            fetch(`${API_BASE}/enrollment-status/center/${selectedB.center_id}`).then(r => r.json()).catch(() => []),
+            fetch(`${API_BASE}/government-evaluations/center/${selectedA.center_id}`).then(r => r.json()).catch(() => []),
+            fetch(`${API_BASE}/government-evaluations/center/${selectedB.center_id}`).then(r => r.json()).catch(() => []),
+            fetch(`${API_BASE}/staff/center/${selectedA.center_id}`).then(r => r.json()).catch(() => []),
+            fetch(`${API_BASE}/staff/center/${selectedB.center_id}`).then(r => r.json()).catch(() => [])
+        ]);
+
+        const a = detailA.data || detailA;
+        const b = detailB.data || detailB;
+        const eA = Array.isArray(enrollA) ? enrollA[0] : enrollA;
+        const eB = Array.isArray(enrollB) ? enrollB[0] : enrollB;
+        const evalLatestA = Array.isArray(evalA) && evalA.length > 0 ? evalA[0] : null;
+        const evalLatestB = Array.isArray(evalB) && evalB.length > 0 ? evalB[0] : null;
+        const staffCountA = Array.isArray(staffA) ? staffA.length : 0;
+        const staffCountB = Array.isArray(staffB) ? staffB.length : 0;
+
+        // 取得平均評分（用 Supabase）
+        const [reviewsA, reviewsB] = await Promise.all([
+            supabaseClient.from('reviews').select('score_overall').eq('center_id', selectedA.center_id),
+            supabaseClient.from('reviews').select('score_overall').eq('center_id', selectedB.center_id)
+        ]);
+        const avgA = calcAvg(reviewsA.data);
+        const avgB = calcAvg(reviewsB.data);
+
+        renderCompareTable(a, b, eA, eB, evalLatestA, evalLatestB, staffCountA, staffCountB, avgA, avgB);
+
+    } catch (err) {
+        console.error('比較資料載入失敗', err);
+        tbody.innerHTML = '<tr class="loading-row"><td colspan="3" style="color:#e74c3c;">❌ 載入比較資料失敗，請稍後再試。</td></tr>';
+    }
+}
+
+// ── 計算平均評分 ──
+function calcAvg(reviews) {
+    if (!reviews || reviews.length === 0) return null;
+    const scores = reviews.filter(r => r.score_overall != null).map(r => r.score_overall);
+    if (scores.length === 0) return null;
+    return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+}
+
+// ── 渲染比較表格 ──
+function renderCompareTable(a, b, eA, eB, evalA, evalB, staffA, staffB, avgA, avgB) {
+    const tbody = document.getElementById('compare-tbody');
+
+    const fmt = (v, fallback = '-') => v != null && v !== '' ? v : fallback;
+    const fmtTime = t => t ? t.slice(0, 5) : '-';
+    const fmtRatio = r => r ? `1 : ${Math.round(1 / r)}` : '-';
+    const fmtFee = f => f ? `NT$ ${Number(f).toLocaleString()}` : '-';
+
+    // 比較輔助：數值越大越好
+    const tagBig = (va, vb) => {
+        if (va == null || vb == null) return ['', ''];
+        return Number(va) > Number(vb)
+            ? ['<span class="tag-better">較優</span>', '<span class="tag-worse">較低</span>']
+            : Number(va) < Number(vb)
+            ? ['<span class="tag-worse">較低</span>', '<span class="tag-better">較優</span>']
+            : ['', ''];
+    };
+    // 數值越小越好
+    const tagSmall = (va, vb) => {
+        if (va == null || vb == null) return ['', ''];
+        return Number(va) < Number(vb)
+            ? ['<span class="tag-better">較優</span>', '<span class="tag-worse">較高</span>']
+            : Number(va) > Number(vb)
+            ? ['<span class="tag-worse">較高</span>', '<span class="tag-better">較優</span>']
+            : ['', ''];
+    };
+
+    const ratioTagA = a.teacher_student_ratio && b.teacher_student_ratio
+        ? (Math.round(1/a.teacher_student_ratio) < Math.round(1/b.teacher_student_ratio)
+            ? '<span class="tag-better">師生比較佳</span>' : '')
+        : '';
+    const ratioTagB = a.teacher_student_ratio && b.teacher_student_ratio
+        ? (Math.round(1/b.teacher_student_ratio) < Math.round(1/a.teacher_student_ratio)
+            ? '<span class="tag-better">師生比較佳</span>' : '')
+        : '';
+
+    const capTags = tagBig(a.total_capacity, b.total_capacity);
+    const feeTags = tagSmall(eA?.monthly_fee, eB?.monthly_fee);
+    const staffTags = tagBig(staffA, staffB);
+    const avgTags = tagBig(avgA, avgB);
+    const waitTags = tagSmall(eA?.waitlist_count, eB?.waitlist_count);
+
+    const evalGrade = (e) => {
+        if (!e) return '-';
+        const cls = ['優等','甲等'].includes(e.evalution_result) ? 'eval-A'
+                  : ['乙等'].includes(e.evalution_result) ? 'eval-B' : 'eval-C';
+        return `<span class="${cls}">${e.evalution_result || '-'}</span>
+                <br><small style="color:#888;">${e.evaluation_academic_year || ''}</small>`;
+    };
+
+    const rows = `
+        <!-- 表頭 -->
+        <tr class="header-row">
+            <th></th>
+            <td class="left-col" style="text-align:center;">
+                🏫 ${a.name}
+                <br><small style="font-weight:normal;opacity:0.8;">${a.district || ''} ${a.category || ''}</small>
+            </td>
+            <td class="right-col" style="text-align:center;">
+                🏫 ${b.name}
+                <br><small style="font-weight:normal;opacity:0.8;">${b.district || ''} ${b.category || ''}</small>
+            </td>
+        </tr>
+
+        <!-- 基本資訊 -->
+        <tr class="section-row"><th>基本資訊</th><td></td><td></td></tr>
+        <tr><th>機構類型</th><td>${fmt(a.category)}</td><td>${fmt(b.category)}</td></tr>
+        <tr><th>營運屬性</th><td>${fmt(a.operation_type)}</td><td>${fmt(b.operation_type)}</td></tr>
+        <tr><th>所在地區</th><td>${fmt(a.district)}</td><td>${fmt(b.district)}</td></tr>
+        <tr><th>地址</th>
+            <td>${[a.city, a.district, a.streetline].filter(Boolean).join(' ') || '-'}</td>
+            <td>${[b.city, b.district, b.streetline].filter(Boolean).join(' ') || '-'}</td>
+        </tr>
+        <tr><th>電話</th><td>${fmt(a.phone)}</td><td>${fmt(b.phone)}</td></tr>
+        <tr><th>負責人</th><td>${fmt(a.representative)}</td><td>${fmt(b.representative)}</td></tr>
+        <tr><th>立案資格</th><td>${fmt(a.qualification)}</td><td>${fmt(b.qualification)}</td></tr>
+
+        <!-- 收托條件 -->
+        <tr class="section-row"><th>收托條件</th><td></td><td></td></tr>
+        <tr><th>總收托容量</th>
+            <td>${fmt(a.total_capacity, '-')} 人 ${capTags[0]}</td>
+            <td>${fmt(b.total_capacity, '-')} 人 ${capTags[1]}</td>
+        </tr>
+        <tr><th>師生比</th>
+            <td>${fmtRatio(a.teacher_student_ratio)} ${ratioTagA}</td>
+            <td>${fmtRatio(b.teacher_student_ratio)} ${ratioTagB}</td>
+        </tr>
+        <tr><th>營業時間</th>
+            <td>${fmtTime(a.open_time)} - ${fmtTime(a.close_time)}</td>
+            <td>${fmtTime(b.open_time)} - ${fmtTime(b.close_time)}</td>
+        </tr>
+
+        <!-- 招生狀態 -->
+        <tr class="section-row"><th>招生狀態</th><td></td><td></td></tr>
+        <tr><th>招生中</th>
+            <td>${eA ? (eA.is_accepting ? '✅ 開放招生中' : '❌ 暫停招生') : '-'}</td>
+            <td>${eB ? (eB.is_accepting ? '✅ 開放招生中' : '❌ 暫停招生') : '-'}</td>
+        </tr>
+        <tr><th>月費</th>
+            <td>${fmtFee(eA?.monthly_fee)} ${feeTags[0]}</td>
+            <td>${fmtFee(eB?.monthly_fee)} ${feeTags[1]}</td>
+        </tr>
+        <tr><th>服務時數</th>
+            <td>${eA?.service_hour ? eA.service_hour + ' 小時/天' : '-'}</td>
+            <td>${eB?.service_hour ? eB.service_hour + ' 小時/天' : '-'}</td>
+        </tr>
+        <tr><th>延托服務</th>
+            <td>${eA ? (eA.extended_care ? '✅ 提供' : '❌ 不提供') : '-'}</td>
+            <td>${eB ? (eB.extended_care ? '✅ 提供' : '❌ 不提供') : '-'}</td>
+        </tr>
+        <tr><th>候補人數</th>
+            <td>${fmt(eA?.waitlist_count, '-')} 人 ${waitTags[0]}</td>
+            <td>${fmt(eB?.waitlist_count, '-')} 人 ${waitTags[1]}</td>
+        </tr>
+        <tr><th>開放名額</th>
+            <td>${fmt(eA?.availability_slots, '-')} 人</td>
+            <td>${fmt(eB?.availability_slots, '-')} 人</td>
+        </tr>
+
+        <!-- 師資 -->
+        <tr class="section-row"><th>師資</th><td></td><td></td></tr>
+        <tr><th>師資人數</th>
+            <td>${staffA} 人 ${staffTags[0]}</td>
+            <td>${staffB} 人 ${staffTags[1]}</td>
+        </tr>
+
+        <!-- 政府評鑑 -->
+        <tr class="section-row"><th>政府評鑑</th><td></td><td></td></tr>
+        <tr><th>最新評鑑</th>
+            <td>${evalGrade(evalA)}</td>
+            <td>${evalGrade(evalB)}</td>
+        </tr>
+        <tr><th>缺失說明</th>
+            <td style="color:#e74c3c; font-size:13px;">${evalA?.non_compliance_details || '無'}</td>
+            <td style="color:#e74c3c; font-size:13px;">${evalB?.non_compliance_details || '無'}</td>
+        </tr>
+
+        <!-- 家長評價 -->
+        <tr class="section-row"><th>家長評價</th><td></td><td></td></tr>
+        <tr><th>平均評分</th>
+            <td>${avgA ? '⭐ ' + avgA + ' / 5' : '尚無評價'} ${avgTags[0]}</td>
+            <td>${avgB ? '⭐ ' + avgB + ' / 5' : '尚無評價'} ${avgTags[1]}</td>
+        </tr>
+
+        <!-- 詳細頁連結 -->
+        <tr class="section-row"><th></th><td></td><td></td></tr>
+        <tr>
+            <th></th>
+            <td style="text-align:center;">
+                <a href="center-detail.html?id=${a.center_id}" class="wireframe-btn" style="text-decoration:none;">查看完整詳情</a>
+            </td>
+            <td style="text-align:center;">
+                <a href="center-detail.html?id=${b.center_id}" class="wireframe-btn" style="text-decoration:none;">查看完整詳情</a>
+            </td>
+        </tr>
+    `;
+
+    tbody.innerHTML = rows;
+}
+
+// ── Enter 鍵搜尋 ──
+document.getElementById('search-a').addEventListener('keypress', e => { if (e.key === 'Enter') searchCenter('a'); });
+document.getElementById('search-b').addEventListener('keypress', e => { if (e.key === 'Enter') searchCenter('b'); });
+
+// ── 點擊其他地方關閉下拉 ──
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.selector-slot')) {
+        document.querySelectorAll('.slot-results').forEach(d => d.classList.remove('open'));
+    }
+});
+
+// ── 從搜尋頁帶入參數（如果有 ?a=id&b=id）──
+async function loadFromParams() {
+    const params = new URLSearchParams(window.location.search);
+    const idA = params.get('a');
+    const idB = params.get('b');
+    if (idA) {
+        const c = allCenters.find(x => x.center_id == idA);
+        if (c) selectCenter('a', c.center_id);
+    }
+    if (idB) {
+        const c = allCenters.find(x => x.center_id == idB);
+        if (c) selectCenter('b', c.center_id);
+    }
+    if (idA && idB) runCompare();
+}
+
+// ── 初始化 ──
+window.onload = async () => {
+    updateNavbar();
+    await loadAllCenters();
+    await loadFromParams();
+};
+</script>
+</body>
+</html>
