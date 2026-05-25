@@ -33,15 +33,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             return;
         }
 
-        sessionStorage.setItem('authToken', result.token);
-        sessionStorage.setItem('loggedInUserName', result.data.name);
-        sessionStorage.setItem('userRole', selectedRole);
-
-        if (selectedRole === 'parent') {
-            sessionStorage.setItem('loggedInUserId', result.data.parent_id);
-        } else {
-            sessionStorage.setItem('loggedInUserId', result.data.centeraccount_id);
-        }
+        sessionStorage
 
         alert(`登入成功！即將跳轉至${selectedRole === 'parent' ? '會員中心' : '管理員後台'}...`);
         window.location.href = targetPage;
