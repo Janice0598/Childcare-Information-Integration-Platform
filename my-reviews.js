@@ -1,25 +1,22 @@
 // my-reviews.js
-
-// Supabase 設定 (僅用於撈取列表，不透過它寫入)
 const SUPABASE_URL = 'https://rfzavcliggzlpkqqcrzr.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// 後端 API 基礎路徑
-const API_BASE = 'http://localhost:3000/api'; 
+const API_BASE = 'http://localhost:3000/api';
 
 let currentEditReviewId = null;
 
-const getUserId = () => localStorage.getItem('loggedInUserId');
+const getUserId = () => sessionStorage.getItem('loggedInUserId');
 
 function logout() {
-    localStorage.clear();
+    sessionStorage.clear();
     window.location.href = 'login.html';
 }
 
 function displayCachedUserInfo() {
-    const userName = localStorage.getItem('loggedInUserName');
-    const userEmail = localStorage.getItem('loggedInUserEmail');
+    const userName = sessionStorage.getItem('loggedInUserName');
+    const userEmail = sessionStorage.getItem('loggedInUserEmail');
     const nameDisplay = document.getElementById('user-name-display');
     const emailDisplay = document.getElementById('user-email-display');
     const navName = document.getElementById('nav-user-name');
@@ -29,10 +26,9 @@ function displayCachedUserInfo() {
     if (navName) navName.innerText = userName ? `👋 你好，${userName}` : '👋 你好，家長';
 }
 
-// 📖 讀取：使用 Supabase 抓取家長資料
 async function loadUserProfile() {
     const userId = getUserId();
-    const userRole = localStorage.getItem('userRole');
+    const userRole = sessionStorage.getItem('userRole');
 
     if (!userId || userRole !== 'parent') {
         alert('請先登入家長帳號');
@@ -48,8 +44,8 @@ async function loadUserProfile() {
             .maybeSingle();
 
         if (data) {
-            if (data.name) localStorage.setItem('loggedInUserName', data.name);
-            if (data.email) localStorage.setItem('loggedInUserEmail', data.email);
+            if (data.name) sessionStorage.setItem('loggedInUserName', data.name);
+            if (data.email) sessionStorage.setItem('loggedInUserEmail', data.email);
             displayCachedUserInfo();
             return data;
         }
@@ -59,7 +55,6 @@ async function loadUserProfile() {
     return null;
 }
 
-// 📖 讀取：使用 Supabase 抓取使用者的評價列表
 async function loadMyReviews() {
     const userId = getUserId();
     if (!userId) {
@@ -68,7 +63,7 @@ async function loadMyReviews() {
         return;
     }
 
-    await loadUserProfile(); 
+    await loadUserProfile();
 
     try {
         const { data: reviews, error } = await supabaseClient
@@ -92,7 +87,6 @@ async function loadMyReviews() {
         listContainer.innerHTML = reviews.map(r => {
             const centerName = r.childcare_center?.name || '未知機構';
             const date = r.created_at ? r.created_at.slice(0, 10) : '-';
-            
             return `
             <div class="result-card" style="flex-direction: column; padding: 20px; border: 2px solid #ccc; background: #fff;" id="review-card-${r.review_id}">
                 <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 12px; margin-bottom: 12px;">
@@ -128,41 +122,29 @@ function escapeHtml(str) {
     });
 }
 
-// 🗑️ 刪除：呼叫 Node.js 後端 API (DELETE /api/reviews/:id)
 async function deleteReview(reviewId) {
     if (!confirm('確定要刪除這筆評價嗎？刪除後將無法復原喔！')) return;
-    
     try {
-        const response = await fetch(`${API_BASE}/reviews/${reviewId}`, {
-            method: 'DELETE'
-        });
-
+        const response = await fetch(`${API_BASE}/reviews/${reviewId}`, { method: 'DELETE' });
         if (!response.ok) throw new Error('刪除失敗');
-        
         document.getElementById(`review-card-${reviewId}`).style.display = 'none';
         alert('✅ 已成功刪除評價！');
-        
     } catch (err) {
         console.error('刪除失敗:', err);
         alert('刪除失敗，請檢查網路連線。');
     }
 }
 
-// 📖 讀取單筆評價至 Modal：後端有 GET /api/reviews/:id 可以用
 async function editReview(reviewId) {
     currentEditReviewId = reviewId;
-
     try {
         const response = await fetch(`${API_BASE}/reviews/${reviewId}`);
         if (!response.ok) throw new Error('無法取得評價內容');
-
         const data = await response.json();
-
         document.getElementById('edit-score-staff').value = data.score_staff || '';
         document.getElementById('edit-score-env').value = data.score_environment || '';
         document.getElementById('edit-score-curriculum').value = data.score_curriculum || '';
         document.getElementById('edit-review-comment').value = data.comment || '';
-
         document.getElementById('editModal').style.display = 'flex';
     } catch (err) {
         console.error('載入評價資料失敗:', err);
@@ -175,7 +157,6 @@ function closeEditModal() {
     currentEditReviewId = null;
 }
 
-// ✏️ 修改：呼叫 Node.js 後端 API (PUT /api/reviews/:id)，觸發自動算分
 async function updateReview(event) {
     event.preventDefault();
     if (!currentEditReviewId) return;
@@ -209,8 +190,7 @@ async function updateReview(event) {
 
         alert('✅ 評價已更新！');
         closeEditModal();
-        await loadMyReviews(); // 重新撈取最新的資料與算好的總分
-        
+        await loadMyReviews();
     } catch (err) {
         console.error('更新失敗:', err);
         alert(`更新失敗: ${err.message}`);
@@ -221,9 +201,7 @@ document.getElementById('editReviewForm').addEventListener('submit', updateRevie
 
 window.onclick = function(event) {
     const modal = document.getElementById('editModal');
-    if (event.target === modal) {
-        closeEditModal();
-    }
+    if (event.target === modal) closeEditModal();
 };
 
 displayCachedUserInfo();
