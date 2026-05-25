@@ -261,7 +261,7 @@
         let editingEvalId = null;
         let currentEnrollmentId = null;
 
-        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+        function logout() { sessionStorage.clear(); window.location.href = 'login.html'; }
 
         function showSection(name) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -282,8 +282,8 @@
 
         // ===================== 初始化 =====================
         async function loadAdminData() {
-            const userId = localStorage.getItem('loggedInUserId');
-            const userRole = localStorage.getItem('userRole');
+            const userId = sessionStorage.getItem('loggedInUserId');
+            const userRole = sessionStorage.getItem('userRole');
 
             if (!userId || userRole !== 'admin') {
                 alert('請先登入管理員帳號！');
@@ -292,7 +292,7 @@
             }
 
             document.getElementById('admin-name-display').innerText =
-                `👤 ${localStorage.getItem('loggedInUserName') || '管理員'} 您好`;
+                `👤 ${sessionStorage.getItem('loggedInUserName') || '管理員'} 您好`;
 
             try {
                 const { data: centerData } = await supabaseClient
