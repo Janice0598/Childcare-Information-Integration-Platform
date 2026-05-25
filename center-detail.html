@@ -65,6 +65,8 @@
                     <span class="detail-badge" id="center-district">-</span>
                 </div>
             </div>
+            <a href="compare.html?a=${centerId}" class="wireframe-btn" 
+               id="compare-link" style="text-decoration:none;">⚖️ 加入比較</a>
             <button class="wireframe-btn primary" onclick="addToFavorite()">❤️ 加入收藏</button>
         </div>
 
@@ -205,6 +207,7 @@
             document.getElementById('center-capacity').innerText = center.total_capacity ? `${center.total_capacity} 人` : '-';
             document.getElementById('center-rep').innerText = center.representative || '-';
             document.getElementById('center-qual').innerText = center.qualification || '-';
+            document.getElementById('compare-link').href = `compare.html?a=${centerId}`;
 
             // 2. 招生狀態 — 走後端 API
             await loadEnrollmentStatus();
