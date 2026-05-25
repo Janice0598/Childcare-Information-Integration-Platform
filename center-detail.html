@@ -201,7 +201,7 @@
             document.getElementById('center-address').innerText = [center.city, center.district, center.streetline].filter(Boolean).join(' ') || '-';
             document.getElementById('center-phone').innerText = center.phone || '-';
             document.getElementById('center-hours').innerText = (center.open_time && center.close_time) ? `${formatTime(center.open_time)} - ${formatTime(center.close_time)}` : '-';
-            document.getElementById('center-ratio').innerText = center.teacher_student_ratio ? `1 : ${center.teacher_student_ratio}` : '-';
+            document.getElementById('center-ratio').innerText = center.teacher_student_ratio ? `1 : ${Math.round(1 / center.teacher_student_ratio)}` : '-';
             document.getElementById('center-capacity').innerText = center.total_capacity ? `${center.total_capacity} 人` : '-';
             document.getElementById('center-rep').innerText = center.representative || '-';
             document.getElementById('center-qual').innerText = center.qualification || '-';
