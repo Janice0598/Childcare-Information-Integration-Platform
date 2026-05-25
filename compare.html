@@ -338,7 +338,7 @@ function searchCenter(slot) {
 
 // ── 選取機構 ──
 function selectCenter(slot, centerId) {
-    const center = allCenters.find(c => c.center_id === centerId);
+    const center = allCenters.find(c => c.center_id == centerId);
     if (!center) return;
 
     if (slot === 'a') {
