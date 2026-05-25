@@ -122,6 +122,8 @@ function renderCenterCards(centers) {
             <button class="wireframe-btn primary"
               style="height:42px;padding:0 16px;cursor:pointer;display:inline-flex;align-items:center;"
               onclick="addToFavorite(${center.center_id})">❤️ 加入收藏</button>
+            <a href="compare.html?a=${center.center_id}" class="wireframe-btn"
+              style="text-decoration:none;height:42px;padding:0 16px;display:inline-flex;align-items:center;background:#fff;border:2px solid #666;">⚖️ 比較</a>
           </div>
         </div>
       </div>`;
