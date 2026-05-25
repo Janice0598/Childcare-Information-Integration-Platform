@@ -6,12 +6,11 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ======================= 導航列動態更新 =======================
 function updateNavbar() {
     const container = document.getElementById('nav-actions-container');
     if (!container) return;
-    const userId = localStorage.getItem('loggedInUserId');
-    const userName = localStorage.getItem('loggedInUserName');
+    const userId = sessionStorage.getItem('loggedInUserId');
+    const userName = sessionStorage.getItem('loggedInUserName');
     if (userId && userName) {
         container.innerHTML = `
             <span style="margin-right: 10px;">👋 你好，${userName}</span>
@@ -23,14 +22,11 @@ function updateNavbar() {
     }
 }
 
-// 全域登出函式
 window.logout = function() {
-    localStorage.clear();
+    sessionStorage.clear();
     window.location.href = 'login.html';
 };
 
-// ======================= 搜尋與篩選邏輯 =======================
-// 套用篩選條件 — 使用後端 /search 多條件 API
 document
   .getElementById("applyFilterBtn")
   .addEventListener("click", async function () {
@@ -70,7 +66,6 @@ document
     }
   });
 
-// 清除條件
 document
   .getElementById("resetFilterBtn")
   .addEventListener("click", function () {
@@ -84,7 +79,6 @@ document
     document.getElementById("applyFilterBtn").click();
   });
 
-// 渲染卡片
 function renderCenterCards(centers) {
   const resultsList = document.getElementById("results-list");
   const resultCount = document.getElementById("result-count");
@@ -94,86 +88,62 @@ function renderCenterCards(centers) {
 
   if (centers.length === 0) {
     resultsList.innerHTML = `
-            <div class="empty-state">
-                找不到符合條件的機構，請嘗試放寬篩選條件！
-            </div>`;
+      <div class="empty-state">
+        找不到符合條件的機構，請嘗試放寬篩選條件！
+      </div>`;
     return;
   }
 
   centers.forEach(async (center) => {
     const openTime = center.open_time ? center.open_time.slice(0, 5) : "-";
     const closeTime = center.close_time ? center.close_time.slice(0, 5) : "-";
-    const hours =
-      openTime !== "-" && closeTime !== "-"
-        ? `${openTime} - ${closeTime}`
-        : "未提供";
+    const hours = openTime !== "-" && closeTime !== "-" ? `${openTime} - ${closeTime}` : "未提供";
     const address =
-      [center.city, center.district, center.streetline]
-        .filter(Boolean)
-        .join(" ") || "未提供";
+      [center.city, center.district, center.streetline].filter(Boolean).join(" ") || "未提供";
+
     resultsList.innerHTML += `
-            <div class="result-card">
-                <div class="card-image" style="overflow:hidden;">
-                    <img id="thumb-${center.center_id}" src="" alt="機構圖片"
-                     style="width:100%;height:100%;object-fit:cover;display:none;">
-                     <span id="thumb-placeholder-${
-                       center.center_id
-                     }">機構圖片</span>
-            </div>
-            
-                <div class="card-content">
-                    <div class="card-header">
-                        <h3 class="center-name">${
-                          center.name || "機構名稱未提供"
-                        }</h3>
-                        <span class="badge">${center.operation_type || ""} ${
-      center.category || ""
-    }</span>
-                    </div>
-                    <p class="text-line highlight">📍 ${address}</p>
-                    <p class="text-line">🕐 營業時間：${hours}</p>
-                    <p class="text-line">👩‍🏫 師生比：1:${
-                      center.teacher_student_ratio || "未提供"
-                    } ｜ 總容量：${center.total_capacity || 0} 人</p>
-                    <div class="card-actions" style="display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:15px;">
-                        <a href="center-detail.html?id=${
-                          center.center_id
-                        }" class="wireframe-btn"
-                            style="text-decoration:none;height:42px;padding:0 16px;display:inline-flex;align-items:center;">查看詳情</a>
-                        <button class="wireframe-btn primary"
-                            style="height:42px;padding:0 16px;cursor:pointer;display:inline-flex;align-items:center;"
-                            onclick="addToFavorite(${
-                              center.center_id
-                            })">❤️ 加入收藏</button>
-                    </div>
-                </div>
-            </div>`;
-    // 非同步抓取第一張照片
+      <div class="result-card">
+        <div class="card-image" style="overflow:hidden;">
+          <img id="thumb-${center.center_id}" src="" alt="機構圖片"
+            style="width:100%;height:100%;object-fit:cover;display:none;">
+          <span id="thumb-placeholder-${center.center_id}">機構圖片</span>
+        </div>
+        <div class="card-content">
+          <div class="card-header">
+            <h3 class="center-name">${center.name || "機構名稱未提供"}</h3>
+            <span class="badge">${center.operation_type || ""} ${center.category || ""}</span>
+          </div>
+          <p class="text-line highlight">📍 ${address}</p>
+          <p class="text-line">🕐 營業時間：${hours}</p>
+          <p class="text-line">👩‍🏫 師生比：1:${center.teacher_student_ratio || "未提供"} ｜ 總容量：${center.total_capacity || 0} 人</p>
+          <div class="card-actions" style="display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:15px;">
+            <a href="center-detail.html?id=${center.center_id}" class="wireframe-btn"
+              style="text-decoration:none;height:42px;padding:0 16px;display:inline-flex;align-items:center;">查看詳情</a>
+            <button class="wireframe-btn primary"
+              style="height:42px;padding:0 16px;cursor:pointer;display:inline-flex;align-items:center;"
+              onclick="addToFavorite(${center.center_id})">❤️ 加入收藏</button>
+          </div>
+        </div>
+      </div>`;
+
     fetch(`${API_BASE}/photo/center/${center.center_id}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((result) => {
         if (!result || !result.data || result.data.length === 0) return;
-        const firstPhoto =
-          result.data.find((p) => p.photo_id === 1) || result.data[0];
+        const firstPhoto = result.data.find((p) => p.photo_id === 1) || result.data[0];
         if (!firstPhoto?.url) return;
         const img = document.getElementById(`thumb-${center.center_id}`);
-        const placeholder = document.getElementById(
-          `thumb-placeholder-${center.center_id}`
-        );
-        if (img) {
-          img.src = firstPhoto.url;
-          img.style.display = "block";
-        }
+        const placeholder = document.getElementById(`thumb-placeholder-${center.center_id}`);
+        if (img) { img.src = firstPhoto.url; img.style.display = "block"; }
         if (placeholder) placeholder.style.display = "none";
       })
       .catch(() => {});
   });
 }
 
-// 加入收藏（檢查 parent 身分）
 async function addToFavorite(centerId) {
-  const userId = localStorage.getItem("loggedInUserId");
-  const userRole = localStorage.getItem("userRole");
+  const userId = sessionStorage.getItem("loggedInUserId");
+  const userRole = sessionStorage.getItem("userRole");
 
   if (!userId || userRole !== "parent") {
     alert("請先登入家長帳號才能收藏！");
@@ -199,7 +169,6 @@ async function addToFavorite(centerId) {
   }
 }
 
-// 關鍵字搜尋（前端過濾）
 function searchByKeyword() {
   const keyword = document.getElementById("keyword-search").value.trim();
   const allCards = document.querySelectorAll(".result-card");
@@ -216,14 +185,11 @@ function searchByKeyword() {
   if (el) el.innerText = visibleCount;
 }
 
-document
-  .getElementById("keyword-search")
-  .addEventListener("keypress", function (event) {
-    if (event.key === "Enter") searchByKeyword();
-  });
+document.getElementById("keyword-search").addEventListener("keypress", function (event) {
+  if (event.key === "Enter") searchByKeyword();
+});
 
-// 頁面載入時更新導航列並自動執行搜尋
 window.onload = function () {
-  updateNavbar();                            // 根據登入狀態顯示正確按鈕
+  updateNavbar();
   document.getElementById("applyFilterBtn").click();
 };
