@@ -33,6 +33,8 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             return;
         }
 
+        console.log('🔍 登入回傳資料:', JSON.stringify(result.data)); // ← 加這行
+
         sessionStorage
 
         alert(`登入成功！即將跳轉至${selectedRole === 'parent' ? '會員中心' : '管理員後台'}...`);
