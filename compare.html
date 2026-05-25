@@ -327,12 +327,20 @@ function searchCenter(slot) {
         resultsDiv.innerHTML = '<div class="slot-result-item"><span class="item-name" style="color:#999;">找不到符合的機構</span></div>';
     } else {
         resultsDiv.innerHTML = filtered.map(c => `
-            <div class="slot-result-item" onclick="selectCenter('${slot}', ${c.center_id})">
-                <div class="item-name">${c.name}</div>
-                <div class="item-meta">${c.district || ''} ${c.category || ''} ${c.operation_type || ''}</div>
-            </div>
+        <div class="slot-result-item" data-slot="${slot}" data-id="${c.center_id}">
+            <div class="item-name">${c.name}</div>
+            <div class="item-meta">${c.district || ''} ${c.category || ''} ${c.operation_type || ''}</div>
+        </div>
+        
         `).join('');
-    }
+
+        // 綁定點擊事件
+        resultsDiv.querySelectorAll('.slot-result-item').forEach(el => {
+            el.addEventListener('click', () => {
+                selectCenter(el.dataset.slot, parseInt(el.dataset.id));
+            });
+        });
+            }
     resultsDiv.classList.add('open');
 }
 
