@@ -559,6 +559,7 @@
       }
 
       // ── 執行比較 ──
+      // ── 執行比較 (升級 BFF 架構版) ──
       async function runCompare() {
         if (!selectedA || !selectedB) return;
 
@@ -572,59 +573,24 @@
         resultDiv.scrollIntoView({ behavior: "smooth", block: "start" });
 
         try {
-          // 同時抓取兩間機構的詳細資料（含招生狀態、評鑑）
-          const [
-            detailA,
-            detailB,
-            enrollA,
-            enrollB,
-            evalA,
-            evalB,
-            staffA,
-            staffB,
-          ] = await Promise.all([
-            fetch(`${API_BASE}/childcare-centers/${selectedA.center_id}`).then(
-              (r) => r.json()
-            ),
-            fetch(`${API_BASE}/childcare-centers/${selectedB.center_id}`).then(
-              (r) => r.json()
-            ),
-            fetch(`${API_BASE}/enrollment-status/center/${selectedA.center_id}`)
-              .then((r) => r.json())
-              .catch(() => []),
-            fetch(`${API_BASE}/enrollment-status/center/${selectedB.center_id}`)
-              .then((r) => r.json())
-              .catch(() => []),
+          // 🌟 1. 改成呼叫你的「超強聚合 API」，原本要發 8 個請求，現在只要 2 個！
+          const [resA, resB] = await Promise.all([
             fetch(
-              `${API_BASE}/government-evaluations/center/${selectedA.center_id}`
-            )
-              .then((r) => r.json())
-              .catch(() => []),
+              `${API_BASE}/childcare-centers/${selectedA.center_id}/compare-details`
+            ).then((r) => r.json()),
             fetch(
-              `${API_BASE}/government-evaluations/center/${selectedB.center_id}`
-            )
-              .then((r) => r.json())
-              .catch(() => []),
-            fetch(`${API_BASE}/staff/center/${selectedA.center_id}`)
-              .then((r) => r.json())
-              .catch(() => []),
-            fetch(`${API_BASE}/staff/center/${selectedB.center_id}`)
-              .then((r) => r.json())
-              .catch(() => []),
+              `${API_BASE}/childcare-centers/${selectedB.center_id}/compare-details`
+            ).then((r) => r.json()),
           ]);
 
-          const a = detailA.data || detailA;
-          const b = detailB.data || detailB;
-          const eA = Array.isArray(enrollA) ? enrollA[0] : enrollA;
-          const eB = Array.isArray(enrollB) ? enrollB[0] : enrollB;
-          const evalLatestA =
-            Array.isArray(evalA) && evalA.length > 0 ? evalA[0] : null;
-          const evalLatestB =
-            Array.isArray(evalB) && evalB.length > 0 ? evalB[0] : null;
-          const staffCountA = Array.isArray(staffA) ? staffA.length : 0;
-          const staffCountB = Array.isArray(staffB) ? staffB.length : 0;
+          if (!resA.success || !resB.success) {
+            throw new Error("無法取得完整的機構比較資料");
+          }
 
-          // 取得平均評分（用 Supabase）
+          const dataA = resA.data;
+          const dataB = resB.data;
+
+          // 🌟 2. 依然保留 Supabase 抓取評價平均 (因為我們的後端 API 尚未整合 reviews 表)
           const [reviewsA, reviewsB] = await Promise.all([
             supabaseClient
               .from("reviews")
@@ -635,18 +601,25 @@
               .select("score_overall")
               .eq("center_id", selectedB.center_id),
           ]);
+
           const avgA = calcAvg(reviewsA.data);
           const avgB = calcAvg(reviewsB.data);
 
+          // 🌟 3. 將拿到的資料，精準對應到你原本的 renderCompareTable 參數中
+          // 參數順序：基本A, 基本B, 招生A, 招生B, 評鑑A, 評鑑B, 師資人數A, 師資人數B, 平均分A, 平均分B
           renderCompareTable(
-            a,
-            b,
-            eA,
-            eB,
-            evalLatestA,
-            evalLatestB,
-            staffCountA,
-            staffCountB,
+            dataA.basic_info,
+            dataB.basic_info,
+            dataA.enrollment_status,
+            dataB.enrollment_status,
+            dataA.government_evaluations.length > 0
+              ? dataA.government_evaluations[0]
+              : null,
+            dataB.government_evaluations.length > 0
+              ? dataB.government_evaluations[0]
+              : null,
+            dataA.staff.length,
+            dataB.staff.length,
             avgA,
             avgB
           );
