@@ -6,132 +6,37 @@
     <title>個人資料設定 - 托育資訊整合平台</title>
     <link rel="stylesheet" href="style.css" />
     <style>
-      .user-layout {
-        display: flex;
-        max-width: 1200px;
-        margin: 40px auto;
-        gap: 30px;
-        padding: 0 20px;
-      }
-      .user-sidebar {
-        width: 250px;
-        background-color: #fff;
-        border: 2px solid #ccc;
-        height: fit-content;
-      }
-      .user-profile-summary {
-        padding: 20px;
-        text-align: center;
-        border-bottom: 2px solid #eee;
-      }
-      .avatar-placeholder {
-        width: 80px;
-        height: 80px;
-        background-color: #ccc;
-        border-radius: 50%;
-        margin: 0 auto 10px auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #666;
-      }
-      .user-menu {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-      .user-menu li {
-        border-bottom: 1px solid #eee;
-      }
-      .user-menu a {
-        display: block;
-        padding: 15px 20px;
-        text-decoration: none;
-        color: #333;
-        font-weight: bold;
-      }
-      .user-menu a:hover,
-      .user-menu a.active {
-        background-color: #eaeaea;
-        border-left: 4px solid #666;
-      }
-      .user-main {
-        flex-grow: 1;
-      }
-      .welcome-header {
-        margin-bottom: 30px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #ccc;
-      }
-      .text-line {
-        color: #666;
-        font-size: 14px;
-      }
-      .profile-section {
-        background: #fff;
-        border: 2px solid #ccc;
-        padding: 25px;
-        margin-bottom: 30px;
-      }
-      .profile-section h3 {
-        margin-top: 0;
-        margin-bottom: 20px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 8px;
-      }
-      .form-group {
-        margin-bottom: 20px;
-      }
-      .form-group label {
-        display: block;
-        font-weight: bold;
-        margin-bottom: 8px;
-        color: #333;
-      }
-      .form-group input {
-        width: 100%;
-        padding: 10px;
-        border: 2px solid #ccc;
-        font-size: 16px;
-      }
-      .btn-save {
-        background-color: #666;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        margin-top: 10px;
-      }
-      .message {
-        margin-top: 20px;
-        padding: 10px;
-        border-radius: 4px;
-        font-size: 14px;
-      }
-      .message.success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-      }
-      .message.error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-      }
+      .user-layout { display: flex; max-width: 1200px; margin: 40px auto; gap: 30px; padding: 0 20px; }
+      .user-sidebar { width: 250px; background-color: #fff; border: 2px solid #ccc; height: fit-content; }
+      .user-profile-summary { padding: 20px; text-align: center; border-bottom: 2px solid #eee; }
+      .avatar-placeholder { width: 80px; height: 80px; background-color: #ccc; border-radius: 50%; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; color: #666; }
+      .user-menu { list-style: none; padding: 0; margin: 0; }
+      .user-menu li { border-bottom: 1px solid #eee; }
+      .user-menu a { display: block; padding: 15px 20px; text-decoration: none; color: #333; font-weight: bold; }
+      .user-menu a:hover, .user-menu a.active { background-color: #eaeaea; border-left: 4px solid #666; }
+      .user-main { flex-grow: 1; }
+      .welcome-header { margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid #ccc; }
+      .text-line { color: #666; font-size: 14px; }
+      .profile-section { background: #fff; border: 2px solid #ccc; padding: 25px; margin-bottom: 30px; }
+      .profile-section h3 { margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+      .form-group { margin-bottom: 20px; }
+      .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
+      .form-group input { width: 100%; padding: 10px; border: 2px solid #ccc; font-size: 16px; }
+      .form-group input:focus { outline: none; border-color: #666; }
+      .btn-save { background-color: #666; color: white; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+      .message { margin-top: 20px; padding: 10px; border-radius: 4px; font-size: 14px; }
+      .message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+      .message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+      .field-hint { font-size: 12px; color: #888; margin-top: 4px; }
+      .field-error-inline { font-size: 12px; color: #e74c3c; margin-top: 4px; display: none; }
     </style>
   </head>
   <body>
     <header class="navbar">
-      <a href="index.html" style="text-decoration: none"
-        ><div class="logo-placeholder">托育整合平台</div></a
-      >
+      <a href="index.html" style="text-decoration: none"><div class="logo-placeholder">托育整合平台</div></a>
       <div class="nav-actions">
         <span id="nav-user-name">👋 你好，家長</span>
-        <a href="index.html" class="wireframe-btn" style="text-decoration: none"
-          >回首頁</a
-        >
+        <a href="index.html" class="wireframe-btn" style="text-decoration: none">回首頁</a>
         <button class="wireframe-btn primary" onclick="logout()">登出</button>
       </div>
     </header>
@@ -147,46 +52,35 @@
           <li><a href="profile.html" class="active">👤 個人資料設定</a></li>
           <li><a href="favorite.html">📁 我的收藏清單</a></li>
           <li><a href="my-reviews.html">📝 我的評價紀錄</a></li>
+          <li><a href="waitlist.html">⏳ 我的候補清單</a></li>
         </ul>
       </aside>
       <main class="user-main">
         <div class="welcome-header">
           <h2>👤 個人資料設定</h2>
-          <p class="text-line">
-            您可以在這裡修改您的姓名、電子郵件與聯絡電話。
-          </p>
+          <p class="text-line">您可以在這裡修改您的姓名、電子郵件與聯絡電話。</p>
         </div>
         <div class="profile-section">
           <h3>📋 基本資料</h3>
-          <form id="profile-form">
+          <form id="profile-form" novalidate>
             <div class="form-group">
               <label>姓名</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                required
-                placeholder="請輸入您的姓名"
-              />
+              <input type="text" id="name" name="name" required
+                minlength="2" maxlength="50" placeholder="請輸入您的姓名" />
             </div>
             <div class="form-group">
               <label>電子郵件</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                placeholder="your@email.com"
-              />
+              <input type="email" id="email" name="email" required
+                placeholder="your@email.com" />
             </div>
             <div class="form-group">
               <label>聯絡電話</label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                placeholder="0912345678"
-              />
+              <!-- ✅ 修正：加上台灣電話格式 pattern -->
+              <input type="tel" id="phone" name="phone"
+                pattern="^(09\d{8}|0[2-8]\d{7,8})$"
+                placeholder="0912345678" />
+              <div class="field-hint">手機格式：09xxxxxxxx；市話格式：0x-xxxxxxxx（選填）</div>
+              <div class="field-error-inline" id="phone-error-profile">電話格式不正確</div>
             </div>
             <button type="submit" class="btn-save">儲存基本資料</button>
             <div id="basic-message"></div>
@@ -197,122 +91,124 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
       const SUPABASE_URL = "https://rfzavcliggzlpkqqcrzr.supabase.co";
-      const SUPABASE_KEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I";
+      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I";
       const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       const API_BASE = "http://localhost:3000/api";
-      function logout() {
-        sessionStorage.clear();
-        window.location.href = "login.html";
-      }
+
+      function logout() { sessionStorage.clear(); window.location.href = 'login.html'; }
 
       function displayCachedUserInfo() {
-        const userName = sessionStorage.getItem("loggedInUserName");
-        const userEmail = sessionStorage.getItem("loggedInUserEmail");
-        const nameDisplay = document.getElementById("user-name-display");
-        const emailDisplay = document.getElementById("user-email-display");
-        const navName = document.getElementById("nav-user-name");
-        if (nameDisplay)
-          nameDisplay.innerText = userName ? `${userName} 家長` : "";
-        if (emailDisplay)
-          emailDisplay.innerText =
-            userEmail && userEmail.trim() ? userEmail : "";
-        if (navName)
-          navName.innerText = userName
-            ? `👋 你好，${userName}`
-            : "👋 你好，家長";
+        const userName = sessionStorage.getItem('loggedInUserName');
+        const userEmail = sessionStorage.getItem('loggedInUserEmail');
+        const nameDisplay = document.getElementById('user-name-display');
+        const emailDisplay = document.getElementById('user-email-display');
+        const navName = document.getElementById('nav-user-name');
+        if (nameDisplay) nameDisplay.innerText = userName ? `${userName} 家長` : '';
+        if (emailDisplay) emailDisplay.innerText = (userEmail && userEmail.trim()) ? userEmail : '';
+        if (navName) navName.innerText = userName ? `👋 你好，${userName}` : '👋 你好，家長';
       }
 
       async function loadUserData() {
-        const userId = sessionStorage.getItem("loggedInUserId");
-        const userRole = sessionStorage.getItem("userRole");
-        if (!userId || userRole !== "parent") {
-          alert("請先登入家長帳號！");
-          window.location.href = "login.html";
+        const userId = sessionStorage.getItem('loggedInUserId');
+        const userRole = sessionStorage.getItem('userRole');
+        if (!userId || userRole !== 'parent') {
+          alert('請先登入家長帳號！');
+          window.location.href = 'login.html';
           return;
         }
         try {
           const { data, error } = await supabaseClient
-            .from("parent")
-            .select("name, email, phone")
-            .eq("parent_id", parseInt(userId))
+            .from('parent')
+            .select('name, email, phone')
+            .eq('parent_id', parseInt(userId))
             .maybeSingle();
           if (error) throw error;
           if (data) {
-            document.getElementById("name").value = data.name || "";
-            document.getElementById("email").value = data.email || "";
-            document.getElementById("phone").value = data.phone || "";
-            if (data.name)
-              sessionStorage.setItem("loggedInUserName", data.name);
-            if (data.email)
-              sessionStorage.setItem("loggedInUserEmail", data.email);
-            if (data.phone)
-              sessionStorage.setItem("loggedInUserPhone", data.phone);
+            document.getElementById('name').value = data.name || '';
+            document.getElementById('email').value = data.email || '';
+            document.getElementById('phone').value = data.phone || '';
+            if (data.name) sessionStorage.setItem('loggedInUserName', data.name);
+            if (data.email) sessionStorage.setItem('loggedInUserEmail', data.email);
             displayCachedUserInfo();
           }
         } catch (err) {
-          showBasicMessage("無法載入基本資料", "error");
+          showBasicMessage('無法載入基本資料', 'error');
         }
       }
 
+      // ✅ 即時電話格式驗證
+      document.getElementById('phone').addEventListener('input', function () {
+        const phoneRegex = /^(09\d{8}|0[2-8]\d{7,8})$/;
+        const errEl = document.getElementById('phone-error-profile');
+        if (this.value && !phoneRegex.test(this.value)) {
+          errEl.style.display = 'block';
+        } else {
+          errEl.style.display = 'none';
+        }
+      });
+
       async function saveProfile(event) {
         event.preventDefault();
-        const userId = sessionStorage.getItem("loggedInUserId");
-        const newName = document.getElementById("name").value.trim();
-        const newEmail = document.getElementById("email").value.trim();
-        const newPhone = document.getElementById("phone").value.trim();
+        const userId = sessionStorage.getItem('loggedInUserId');
+        const newName = document.getElementById('name').value.trim();
+        const newEmail = document.getElementById('email').value.trim();
+        const newPhone = document.getElementById('phone').value.trim();
 
-        if (!newName) {
-          showBasicMessage("請填寫姓名", "error");
+        if (!newName || newName.length < 2) {
+          showBasicMessage('請填寫姓名（至少 2 個字元）', 'error');
           return;
         }
-        if (!newEmail || !/^\S+@\S+\.\S+$/.test(newEmail)) {
-          showBasicMessage("請填寫有效的電子郵件", "error");
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!newEmail || !emailRegex.test(newEmail)) {
+          showBasicMessage('請填寫有效的電子郵件', 'error');
           return;
         }
+        // ✅ 電話格式驗證（選填，但填了要對）
+        if (newPhone) {
+          const phoneRegex = /^(09\d{8}|0[2-8]\d{7,8})$/;
+          if (!phoneRegex.test(newPhone)) {
+            showBasicMessage('電話格式不正確，手機請輸入 09 開頭共 10 碼', 'error');
+            return;
+          }
+        }
 
-        // 🌟 1. 拿出家長通行證
-        const token = sessionStorage.getItem("authToken");
-
+        const token = sessionStorage.getItem('authToken');
         try {
           const updateData = { name: newName, email: newEmail };
           if (newPhone) updateData.phone = newPhone;
 
-          // 🌟 2. 改成呼叫你的 Node.js 後端 API (請確認路徑是否為 /api/parent)
           const response = await fetch(`${API_BASE}/parent/${userId}`, {
-            method: "PUT",
+            method: 'PUT',
             headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`, // 🌟 帶上通行證給警衛檢查
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify(updateData),
           });
 
           if (!response.ok) {
             const errData = await response.json();
-            throw new Error(errData.error || "更新失敗");
+            throw new Error(errData.error || '更新失敗');
           }
 
-          // 更新成功後，同步更新瀏覽器保險箱裡的資料
-          sessionStorage.setItem("loggedInUserName", newName);
-          sessionStorage.setItem("loggedInUserEmail", newEmail);
-          if (newPhone) sessionStorage.setItem("loggedInUserPhone", newPhone);
+          sessionStorage.setItem('loggedInUserName', newName);
+          sessionStorage.setItem('loggedInUserEmail', newEmail);
+          if (newPhone) sessionStorage.setItem('loggedInUserPhone', newPhone);
           displayCachedUserInfo();
-          showBasicMessage("✅ 基本資料已更新！", "success");
+          showBasicMessage('✅ 基本資料已更新！', 'success');
         } catch (err) {
           console.error(err);
-          showBasicMessage("儲存失敗：" + err.message, "error");
+          showBasicMessage('儲存失敗：' + err.message, 'error');
         }
       }
+
       function showBasicMessage(msg, type) {
-        const div = document.getElementById("basic-message");
+        const div = document.getElementById('basic-message');
         div.innerHTML = `<div class="message ${type}">${msg}</div>`;
-        setTimeout(() => (div.innerHTML = ""), 3000);
+        setTimeout(() => (div.innerHTML = ''), 4000);
       }
 
-      document
-        .getElementById("profile-form")
-        .addEventListener("submit", saveProfile);
+      document.getElementById('profile-form').addEventListener('submit', saveProfile);
       displayCachedUserInfo();
       loadUserData();
     </script>
