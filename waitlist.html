@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的候補清單 - 托育資訊整合平台</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .user-layout { display: flex; max-width: 1200px; margin: 40px auto; gap: 30px; padding: 0 20px; }
+        .user-sidebar { width: 250px; background-color: #fff; border: 2px solid #ccc; height: fit-content; }
+        .user-profile-summary { padding: 20px; text-align: center; border-bottom: 2px solid #eee; }
+        .avatar-placeholder { width: 80px; height: 80px; background-color: #ccc; border-radius: 50%; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; color: #666; }
+        .user-menu { list-style: none; padding: 0; margin: 0; }
+        .user-menu li { border-bottom: 1px solid #eee; }
+        .user-menu a { display: block; padding: 15px 20px; text-decoration: none; color: #333; font-weight: bold; }
+        .user-menu a:hover, .user-menu a.active { background-color: #eaeaea; border-left: 4px solid #666; }
+        .user-main { flex-grow: 1; }
+        .welcome-header { margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid #ccc; }
+        .text-line { color: #666; font-size: 14px; }
+
+        .waitlist-card {
+            background: #fff;
+            border: 2px solid #ccc;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .waitlist-card-icon {
+            font-size: 36px;
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            background: #fff8e1;
+            border: 2px solid #fcd34d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .waitlist-card-content { flex-grow: 1; }
+        .waitlist-card-name { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 6px; }
+        .waitlist-card-meta { font-size: 13px; color: #666; margin-bottom: 10px; }
+        .waitlist-card-date { font-size: 12px; color: #999; margin-bottom: 12px; }
+        .waitlist-card-actions { display: flex; gap: 10px; }
+        .btn-cancel-waitlist {
+            padding: 8px 16px;
+            background: #fff;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .btn-cancel-waitlist:hover { background: #fee2e2; }
+        .empty-state { text-align: center; padding: 50px 20px; border: 2px dashed #ccc; background: #fff; color: #666; }
+    </style>
+</head>
+<body>
+
+<header class="navbar">
+    <a href="index.html" style="text-decoration: none;">
+        <div class="logo-placeholder">托育整合平台</div>
+    </a>
+    <div class="nav-actions">
+        <span id="nav-user-name">👋 你好，家長</span>
+        <a href="index.html" class="wireframe-btn" style="text-decoration:none;">回首頁</a>
+        <button class="wireframe-btn primary" onclick="logout()">登出</button>
+    </div>
+</header>
+
+<div class="user-layout">
+    <aside class="user-sidebar">
+        <div class="user-profile-summary">
+            <div class="avatar-placeholder">大頭貼</div>
+            <h3 id="user-name-display">載入中...</h3>
+            <div id="user-email-display" class="text-line"></div>
+        </div>
+        <ul class="user-menu">
+            <li><a href="user.html">🏠 會員首頁概況</a></li>
+            <li><a href="profile.html">👤 個人資料設定</a></li>
+            <li><a href="favorite.html">📁 我的收藏清單</a></li>
+            <li><a href="my-reviews.html">📝 我的評價紀錄</a></li>
+            <li><a href="waitlist.html" class="active">⏳ 我的候補清單</a></li>
+        </ul>
+    </aside>
+
+    <main class="user-main">
+        <div class="welcome-header">
+            <h2>⏳ 我的候補清單</h2>
+            <p class="text-line">以下是您目前已登記候補的托育機構，有名額時機構將主動聯繫您。</p>
+        </div>
+
+        <div id="waitlist-list" style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="text-align:center; padding: 40px; color: #666;">⏳ 正在載入候補清單...</div>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = "https://rfzavcliggzlpkqqcrzr.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const API_BASE = "http://localhost:3000/api";
+
+    function logout() { sessionStorage.clear(); window.location.href = "login.html"; }
+
+    function displayUserInfo() {
+        const userName = sessionStorage.getItem("loggedInUserName");
+        const userEmail = sessionStorage.getItem("loggedInUserEmail");
+        const nameDisplay = document.getElementById("user-name-display");
+        const emailDisplay = document.getElementById("user-email-display");
+        const navName = document.getElementById("nav-user-name");
+        if (nameDisplay) nameDisplay.innerText = userName || "家長";
+        if (emailDisplay) emailDisplay.innerText = userEmail || "";
+        if (navName) navName.innerText = userName ? `👋 你好，${userName}` : "👋 你好，家長";
+    }
+
+    async function loadWaitlist() {
+        const userId = sessionStorage.getItem("loggedInUserId");
+        const userRole = sessionStorage.getItem("userRole");
+        const token = sessionStorage.getItem("authToken");
+
+        if (!userId || userRole !== "parent") {
+            alert("請先登入家長帳號！");
+            window.location.href = "login.html";
+            return;
+        }
+
+        displayUserInfo();
+
+        const container = document.getElementById("waitlist-list");
+
+        try {
+            const res = await fetch(`${API_BASE}/waitlist/parent/${userId}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            if (!res.ok) throw new Error("無法載入候補清單");
+            const result = await res.json();
+            const items = result.data;
+
+            if (!items || items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        您目前沒有登記候補的機構。<br><br>
+                        <a href="search.html" class="wireframe-btn primary" style="text-decoration:none; display:inline-block; margin-top:10px;">前往搜尋機構</a>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = items.map(item => `
+                <div class="waitlist-card" id="waitlist-entry-${item.waitlist_id}">
+                    <div class="waitlist-card-icon">⏳</div>
+                    <div class="waitlist-card-content">
+                        <div class="waitlist-card-name">🏫 ${escapeHtml(item.center_name)}</div>
+                        <div class="waitlist-card-meta">
+                            📍 ${escapeHtml(item.district) || "地區未提供"} ｜ ${escapeHtml(item.category) || ""}
+                        </div>
+                        <div class="waitlist-card-date">
+                            🕐 登記時間：${item.joined_at ? item.joined_at.slice(0, 10) : "-"}
+                        </div>
+                        <div class="waitlist-card-actions">
+                            <a href="center-detail.html?id=${item.center_id}" class="wireframe-btn"
+                                style="text-decoration:none; font-size:13px; padding:6px 14px;">
+                                🔍 查看機構
+                            </a>
+                            <button class="btn-cancel-waitlist"
+                                onclick="cancelWaitlist(${item.waitlist_id}, ${item.center_id})">
+                                ✕ 取消候補
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+
+        } catch (err) {
+            console.error("載入候補清單失敗:", err);
+            container.innerHTML = '<div class="empty-state">載入失敗，請確認後端伺服器是否開啟。</div>';
+        }
+    }
+
+    async function cancelWaitlist(waitlistId, centerId) {
+        if (!confirm("確定要取消此機構的候補登記嗎？")) return;
+        const token = sessionStorage.getItem("authToken");
+        try {
+            const res = await fetch(`${API_BASE}/waitlist/${waitlistId}`, {
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (!res.ok) {
+                const e = await res.json();
+                throw new Error(e.error || "取消失敗");
+            }
+            const entry = document.getElementById(`waitlist-entry-${waitlistId}`);
+            if (entry) entry.style.display = "none";
+            alert("✅ 已取消候補登記！");
+
+            // 若清單全部移除則顯示空狀態
+            const remaining = document.querySelectorAll('.waitlist-card:not([style*="display: none"])');
+            if (remaining.length === 0) {
+                document.getElementById("waitlist-list").innerHTML = `
+                    <div class="empty-state">
+                        您目前沒有登記候補的機構。<br><br>
+                        <a href="search.html" class="wireframe-btn primary" style="text-decoration:none; display:inline-block; margin-top:10px;">前往搜尋機構</a>
+                    </div>`;
+            }
+        } catch (err) {
+            console.error("取消候補失敗:", err);
+            alert("取消失敗：" + err.message);
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return "";
+        return str.replace(/[&<>]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[m] || m));
+    }
+
+    loadWaitlist();
+</script>
+</body>
+</html>
