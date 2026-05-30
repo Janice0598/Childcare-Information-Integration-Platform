@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>家長註冊 - 托育資訊整合平台</title>
     <link rel="stylesheet" href="style.css">
-    <!-- 沿用登入頁面的置中卡片樣式 -->
     <style>
         .auth-container {
             min-height: calc(100vh - 70px);
@@ -14,27 +13,23 @@
             justify-content: center;
             padding: 20px;
         }
-
         .auth-card {
             background-color: #fff;
             width: 100%;
-            max-width: 450px; /* 註冊欄位較多，卡片稍微加寬一點 */
+            max-width: 450px;
             padding: 40px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             border: 1px solid #ccc;
         }
-
         .auth-title {
             text-align: center;
             margin-bottom: 30px;
             color: #333;
         }
-
         .form-group {
             margin-bottom: 20px;
         }
-
         .form-label {
             display: block;
             margin-bottom: 8px;
@@ -42,22 +37,33 @@
             color: #333;
             font-size: 14px;
         }
-
         .auth-links {
             margin-top: 20px;
             text-align: center;
             font-size: 14px;
         }
-        
         .auth-links a {
             color: #666;
             text-decoration: none;
             font-weight: bold;
         }
+        .field-hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+        .field-error {
+            font-size: 12px;
+            color: #e74c3c;
+            margin-top: 4px;
+            display: none;
+        }
+        input:invalid + .field-error {
+            display: block;
+        }
     </style>
 </head>
 <body>
-
     <header class="navbar">
         <a href="index.html" style="text-decoration: none;">
             <div class="logo-placeholder">托育整合平台</div>
@@ -67,32 +73,45 @@
     <main class="auth-container">
         <div class="auth-card">
             <h2 class="auth-title">家長會員註冊</h2>
-            
-            <!-- 註冊表單 -->
-            <form id="registerForm">
+
+            <form id="registerForm" novalidate>
                 <div class="form-group">
                     <label class="form-label" for="name">家長姓名 (Name)</label>
-                    <input type="text" id="name" class="wireframe-input full-width" required placeholder="例如：王小明">
+                    <input type="text" id="name" class="wireframe-input full-width"
+                        required minlength="2" maxlength="50"
+                        placeholder="例如：王小明">
+                    <div class="field-hint">請輸入 2～50 個字元</div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="phone">聯絡電話 (Phone)</label>
-                    <input type="tel" id="phone" class="wireframe-input full-width" required placeholder="例如：0912345678">
+                    <!-- ✅ 修正：加上台灣手機/市話格式限制 -->
+                    <input type="tel" id="phone" class="wireframe-input full-width"
+                        required
+                        pattern="^(09\d{8}|0[2-8]\d{7,8})$"
+                        placeholder="例如：0912345678">
+                    <div class="field-hint">手機格式：09xxxxxxxx；市話格式：0x-xxxxxxxx</div>
+                    <div class="field-error" id="phone-error">電話格式不正確，手機請輸入 09 開頭共 10 碼</div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="email">電子郵件 (Email)</label>
-                    <input type="email" id="email" class="wireframe-input full-width" required placeholder="user@example.com">
+                    <input type="email" id="email" class="wireframe-input full-width"
+                        required placeholder="user@example.com">
+                    <div class="field-hint">請輸入有效的電子郵件格式</div>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label" for="password">設定密碼 (Password)</label>
-                    <input type="password" id="password" class="wireframe-input full-width" required placeholder="請設定 6 碼以上密碼">
+                    <input type="password" id="password" class="wireframe-input full-width"
+                        required minlength="6" placeholder="請設定 6 碼以上密碼">
+                    <div class="field-hint">至少 6 個字元</div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="confirmPassword">確認密碼 (Confirm Password)</label>
-                    <input type="password" id="confirmPassword" class="wireframe-input full-width" required placeholder="請再次輸入密碼">
+                    <input type="password" id="confirmPassword" class="wireframe-input full-width"
+                        required placeholder="請再次輸入密碼">
                 </div>
 
                 <button type="submit" class="wireframe-btn primary full-width">立即註冊</button>
@@ -104,9 +123,83 @@
         </div>
     </main>
 
-    <!-- 1. 引入 Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- 2. 引入註冊用的 JS -->
-    <script src="register.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        // ✅ 即時電話格式驗證提示
+        document.getElementById('phone').addEventListener('input', function () {
+            const phoneRegex = /^(09\d{8}|0[2-8]\d{7,8})$/;
+            const errEl = document.getElementById('phone-error');
+            if (this.value && !phoneRegex.test(this.value)) {
+                errEl.style.display = 'block';
+            } else {
+                errEl.style.display = 'none';
+            }
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const inputName = document.getElementById('name').value.trim();
+            const inputPhone = document.getElementById('phone').value.trim();
+            const inputEmail = document.getElementById('email').value.trim();
+            const inputPassword = document.getElementById('password').value;
+            const inputConfirm = document.getElementById('confirmPassword').value;
+
+            // ✅ 電話格式驗證
+            const phoneRegex = /^(09\d{8}|0[2-8]\d{7,8})$/;
+            if (!phoneRegex.test(inputPhone)) {
+                alert('電話格式不正確！手機請輸入 09 開頭共 10 碼（例：0912345678），市話請輸入區碼加號碼。');
+                document.getElementById('phone').focus();
+                return;
+            }
+
+            // Email 格式驗證
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(inputEmail)) {
+                alert('請輸入有效的電子郵件格式！');
+                document.getElementById('email').focus();
+                return;
+            }
+
+            if (inputPassword !== inputConfirm) {
+                alert('兩次輸入的密碼不一致，請重新確認！');
+                return;
+            }
+
+            if (inputPassword.length < 6) {
+                alert('密碼長度至少需要 6 個字元！');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/parent/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: inputName,
+                        phone: inputPhone,
+                        email: inputEmail,
+                        password: inputPassword
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    alert('註冊失敗：' + (result.error || '請檢查資料格式是否正確'));
+                    return;
+                }
+
+                alert('✅ 註冊成功！系統將跳轉至登入頁面，請使用新帳號登入。');
+                window.location.href = 'login.html';
+
+            } catch (err) {
+                console.error('系統發生錯誤:', err);
+                alert('無法連線到伺服器，請確認後端伺服器是否開啟。');
+            }
+        });
+    </script>
 </body>
 </html>
