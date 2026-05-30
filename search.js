@@ -143,6 +143,7 @@ function renderCenterCards(centers) {
   });
 }
 
+// ✅ 修正：改用後端 API（POST /api/favorites），不再直接寫 Supabase
 async function addToFavorite(centerId) {
   const userId = sessionStorage.getItem("loggedInUserId");
   const userRole = sessionStorage.getItem("userRole");
@@ -152,22 +153,37 @@ async function addToFavorite(centerId) {
     window.location.href = "login.html";
     return;
   }
+
+  const token = sessionStorage.getItem("authToken");
+
   try {
-    const { error } = await supabaseClient
-      .from("favorite_item")
-      .insert([{ parent_id: parseInt(userId), center_id: centerId }]);
-    if (error) {
-      if (error.code === "23505") {
+    const response = await fetch(`${API_BASE}/favorites`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        parent_id: parseInt(userId),
+        center_id: centerId,
+      }),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json();
+      // 409 = 重複收藏
+      if (response.status === 409 || (errData.error && errData.error.includes("重複"))) {
         alert("這間機構已在您的收藏清單中！");
       } else {
-        throw error;
+        throw new Error(errData.error || "收藏失敗");
       }
-    } else {
-      alert("✅ 已加入收藏！");
+      return;
     }
+
+    alert("✅ 已加入收藏！");
   } catch (err) {
     console.error(err);
-    alert("收藏失敗，請稍後再試。");
+    alert("收藏失敗：" + err.message);
   }
 }
 
