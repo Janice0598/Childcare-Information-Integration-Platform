@@ -103,7 +103,8 @@
       const API_BASE = "http://localhost:3000/api";
 
       // ✅ 修正一：統一在最外層宣告 regex，所有驗證共用同一規則
-      const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+      // ✅ TLD 限制 2~6 碼，擋掉 comcomcomcom 之類的亂填格式
+      const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\.[a-zA-Z]{2,6}$/;
       const PHONE_REGEX = /^(09\d{8}|0[2-8]\d{7,8})$/;
 
       function logout() { sessionStorage.clear(); window.location.href = 'login.html'; }
