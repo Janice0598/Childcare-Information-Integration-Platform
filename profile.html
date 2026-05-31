@@ -138,11 +138,17 @@
         }
       }
 
-      // ✅ 即時 email 格式驗證
+      const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
+      // ✅ 即時 email 格式驗證 + 按鈕 disabled
       document.getElementById('email').addEventListener('input', function () {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const errEl = document.getElementById('email-error-profile');
-        errEl.style.display = (this.value && !emailRegex.test(this.value)) ? 'block' : 'none';
+        const saveBtn = document.querySelector('.btn-save');
+        const valid = emailRegex.test(this.value);
+        errEl.style.display = (this.value && !valid) ? 'block' : 'none';
+        saveBtn.disabled = this.value && !valid;
+        saveBtn.style.opacity = (this.value && !valid) ? '0.4' : '1';
+        saveBtn.style.cursor = (this.value && !valid) ? 'not-allowed' : 'pointer';
       });
 
       // ✅ 即時電話格式驗證
@@ -168,7 +174,7 @@
           document.getElementById('name').focus();
           return;
         }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
         if (!newEmail || !emailRegex.test(newEmail)) {
           // ✅ 同時顯示紅字 inline 提示 + message 區塊，雙重提醒
           document.getElementById('email-error-profile').style.display = 'block';
