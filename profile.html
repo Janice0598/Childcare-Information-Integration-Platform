@@ -23,7 +23,10 @@
       .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
       .form-group input { width: 100%; padding: 10px; border: 2px solid #ccc; font-size: 16px; }
       .form-group input:focus { outline: none; border-color: #666; }
+      /* ✅ 修正：email 輸入框在格式錯誤時顯示紅框 */
+      .form-group input.input-error { border-color: #e74c3c !important; }
       .btn-save { background-color: #666; color: white; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+      .btn-save:disabled { background-color: #aaa; cursor: not-allowed; opacity: 0.5; }
       .message { margin-top: 20px; padding: 10px; border-radius: 4px; font-size: 14px; }
       .message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
       .message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
@@ -70,21 +73,23 @@
             </div>
             <div class="form-group">
               <label>電子郵件</label>
-              <input type="email" id="email" name="email" required
-                placeholder="your@email.com" />
+              <input type="text" id="email" name="email" required
+                placeholder="your@email.com" autocomplete="email" />
               <div class="field-hint">請輸入有效的電子郵件格式（範例：name@domain.com）</div>
-              <div class="field-error-inline" id="email-error-profile">電子郵件格式不正確</div>
+              <!-- ✅ 修正：使用 type="text" 讓自訂 regex 全權控制，避免瀏覽器原生驗證不一致 -->
+              <div class="field-error-inline" id="email-error-profile">
+                ❌ 電子郵件格式不正確，範例：name@domain.com
+              </div>
             </div>
             <div class="form-group">
               <label>聯絡電話</label>
-              <!-- ✅ 修正：加上台灣電話格式 pattern -->
               <input type="tel" id="phone" name="phone"
                 pattern="^(09\d{8}|0[2-8]\d{7,8})$"
                 placeholder="0912345678" />
               <div class="field-hint">手機格式：09xxxxxxxx；市話格式：0x-xxxxxxxx（選填）</div>
               <div class="field-error-inline" id="phone-error-profile">電話格式不正確</div>
             </div>
-            <button type="submit" class="btn-save">儲存基本資料</button>
+            <button type="submit" class="btn-save" id="save-btn">儲存基本資料</button>
             <div id="basic-message"></div>
           </form>
         </div>
@@ -96,6 +101,10 @@
       const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemF2Y2xpZ2d6bHBrcXFjcnpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY1NjUsImV4cCI6MjA5MjY1MjU2NX0.PAPu8svIFjvDXUfY91yXGIRmktBCKExsOnqxlYW0z_I";
       const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       const API_BASE = "http://localhost:3000/api";
+
+      // ✅ 修正一：統一在最外層宣告 regex，所有驗證共用同一規則
+      const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+      const PHONE_REGEX = /^(09\d{8}|0[2-8]\d{7,8})$/;
 
       function logout() { sessionStorage.clear(); window.location.href = 'login.html'; }
 
@@ -109,6 +118,36 @@
         if (emailDisplay) emailDisplay.innerText = (userEmail && userEmail.trim()) ? userEmail : '';
         if (navName) navName.innerText = userName ? `👋 你好，${userName}` : '👋 你好，家長';
       }
+
+      // ✅ 修正二：獨立的 email 驗證函數，可被事件監聽器與 loadUserData 共用
+      function validateEmailField() {
+        const emailInput = document.getElementById('email');
+        const emailVal = emailInput.value.trim();
+        const errEl = document.getElementById('email-error-profile');
+        const saveBtn = document.getElementById('save-btn');
+
+        const isEmpty = emailVal === '';
+        const isValid = EMAIL_REGEX.test(emailVal);
+        const hasError = !isEmpty && !isValid;
+
+        // 顯示/隱藏錯誤訊息與紅框
+        errEl.style.display = hasError ? 'block' : 'none';
+        emailInput.classList.toggle('input-error', hasError);
+
+        // ✅ 核心修正：格式錯誤時禁用送出按鈕，防止表單被送出
+        saveBtn.disabled = hasError;
+      }
+
+      // ✅ 修正三：phone 即時驗證（獨立函數）
+      function validatePhoneField() {
+        const phoneVal = document.getElementById('phone').value.trim();
+        const errEl = document.getElementById('phone-error-profile');
+        errEl.style.display = (phoneVal && !PHONE_REGEX.test(phoneVal)) ? 'block' : 'none';
+      }
+
+      // 綁定即時驗證事件
+      document.getElementById('email').addEventListener('input', validateEmailField);
+      document.getElementById('phone').addEventListener('input', validatePhoneField);
 
       async function loadUserData() {
         const userId = sessionStorage.getItem('loggedInUserId');
@@ -132,65 +171,51 @@
             if (data.name) sessionStorage.setItem('loggedInUserName', data.name);
             if (data.email) sessionStorage.setItem('loggedInUserEmail', data.email);
             displayCachedUserInfo();
+            // ✅ 修正四：資料填入後立即執行驗證，確保初始狀態正確
+            // （若資料庫中已存有不合格的 email，頁面一載入就會顯示警告且禁用按鈕）
+            validateEmailField();
+            validatePhoneField();
           }
         } catch (err) {
           showBasicMessage('無法載入基本資料', 'error');
         }
       }
 
-      const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-
-      // ✅ 即時 email 格式驗證 + 按鈕 disabled
-      document.getElementById('email').addEventListener('input', function () {
-        const errEl = document.getElementById('email-error-profile');
-        const saveBtn = document.querySelector('.btn-save');
-        const valid = emailRegex.test(this.value);
-        errEl.style.display = (this.value && !valid) ? 'block' : 'none';
-        saveBtn.disabled = this.value && !valid;
-        saveBtn.style.opacity = (this.value && !valid) ? '0.4' : '1';
-        saveBtn.style.cursor = (this.value && !valid) ? 'not-allowed' : 'pointer';
-      });
-
-      // ✅ 即時電話格式驗證
-      document.getElementById('phone').addEventListener('input', function () {
-        const phoneRegex = /^(09\d{8}|0[2-8]\d{7,8})$/;
-        const errEl = document.getElementById('phone-error-profile');
-        if (this.value && !phoneRegex.test(this.value)) {
-          errEl.style.display = 'block';
-        } else {
-          errEl.style.display = 'none';
-        }
-      });
-
       async function saveProfile(event) {
         event.preventDefault();
+
         const userId = sessionStorage.getItem('loggedInUserId');
         const newName = document.getElementById('name').value.trim();
         const newEmail = document.getElementById('email').value.trim();
         const newPhone = document.getElementById('phone').value.trim();
 
+        // ── 姓名驗證 ──
         if (!newName || newName.length < 2) {
           showBasicMessage('請填寫姓名（至少 2 個字元）', 'error');
           document.getElementById('name').focus();
           return;
         }
-        const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-        if (!newEmail || !emailRegex.test(newEmail)) {
-          // ✅ 同時顯示紅字 inline 提示 + message 區塊，雙重提醒
+
+        // ✅ 修正五：送出時強制用同一個 EMAIL_REGEX 再驗證一次
+        // 這層是防禦性最後關卡，防止 JS disabled 被開發者工具繞過
+        if (!newEmail) {
+          showBasicMessage('請填寫電子郵件', 'error');
+          document.getElementById('email').focus();
+          return;
+        }
+        if (!EMAIL_REGEX.test(newEmail)) {
           document.getElementById('email-error-profile').style.display = 'block';
+          document.getElementById('email').classList.add('input-error');
           showBasicMessage('❌ 電子郵件格式不正確，請重新輸入（範例：name@domain.com）', 'error');
           document.getElementById('email').focus();
           return;
-        } else {
-          document.getElementById('email-error-profile').style.display = 'none';
         }
-        // ✅ 電話格式驗證（選填，但填了要對）
-        if (newPhone) {
-          const phoneRegex = /^(09\d{8}|0[2-8]\d{7,8})$/;
-          if (!phoneRegex.test(newPhone)) {
-            showBasicMessage('電話格式不正確，手機請輸入 09 開頭共 10 碼', 'error');
-            return;
-          }
+
+        // ── 電話驗證（選填，填了就要對）──
+        if (newPhone && !PHONE_REGEX.test(newPhone)) {
+          showBasicMessage('電話格式不正確，手機請輸入 09 開頭共 10 碼', 'error');
+          document.getElementById('phone').focus();
+          return;
         }
 
         const token = sessionStorage.getItem('authToken');
