@@ -17,8 +17,8 @@
 
         .user-sidebar {
             width: 250px;
-            background-color: #fff;
-            border: 2px solid #ccc;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-light);
             height: fit-content;
         }
 
@@ -37,7 +37,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #666;
+            color: var(--text-muted);
         }
 
         .user-menu {
@@ -47,20 +47,20 @@
         }
 
         .user-menu li {
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--border-light);
         }
 
         .user-menu a {
             display: block;
             padding: 15px 20px;
             text-decoration: none;
-            color: #333;
+            color: var(--text-main);
             font-weight: bold;
         }
 
         .user-menu a:hover,
         .user-menu a.active {
-            background-color: #eaeaea;
+            background-color: #F2EFEB;
             border-left: 4px solid #666;
         }
 
@@ -71,7 +71,7 @@
         .welcome-header {
             margin-bottom: 30px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #ccc;
+            border-bottom: 1px solid var(--border-light);
         }
 
         .btn-remove {
@@ -88,7 +88,7 @@
         }
 
         .text-line {
-            color: #666;
+            color: var(--text-muted);
             font-size: 14px;
         }
     </style>
@@ -129,7 +129,7 @@
             </div>
 
             <div id="favorite-list" style="display: flex; flex-direction: column; gap: 20px;">
-                <div class="empty-state" id="loading-msg" style="text-align: center; padding: 40px; color: #666;">
+                <div class="empty-state" id="loading-msg" style="text-align: center; padding: 40px; color: var(--text-muted);">
                     ⏳ 正在載入您的收藏清單...
                 </div>
             </div>

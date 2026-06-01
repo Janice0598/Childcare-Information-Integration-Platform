@@ -7,20 +7,20 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .user-layout { display: flex; max-width: 1200px; margin: 40px auto; gap: 30px; padding: 0 20px; }
-        .user-sidebar { width: 250px; background-color: #fff; border: 2px solid #ccc; height: fit-content; }
+        .user-sidebar { width: 250px; background-color: var(--surface-color); border: 1px solid var(--border-light); height: fit-content; }
         .user-profile-summary { padding: 20px; text-align: center; border-bottom: 2px solid #eee; }
-        .avatar-placeholder { width: 80px; height: 80px; background-color: #ccc; border-radius: 50%; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; color: #666; }
+        .avatar-placeholder { width: 80px; height: 80px; background-color: #ccc; border-radius: 50%; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
         .user-menu { list-style: none; padding: 0; margin: 0; }
-        .user-menu li { border-bottom: 1px solid #eee; }
-        .user-menu a { display: block; padding: 15px 20px; text-decoration: none; color: #333; font-weight: bold; }
-        .user-menu a:hover, .user-menu a.active { background-color: #eaeaea; border-left: 4px solid #666; }
+        .user-menu li { border-bottom: 1px solid var(--border-light); }
+        .user-menu a { display: block; padding: 15px 20px; text-decoration: none; color: var(--text-main); font-weight: bold; }
+        .user-menu a:hover, .user-menu a.active { background-color: #F2EFEB; border-left: 4px solid #666; }
         .user-main { flex-grow: 1; }
-        .welcome-header { margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid #ccc; }
-        .text-line { color: #666; font-size: 14px; }
+        .welcome-header { margin-bottom: 30px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
+        .text-line { color: var(--text-muted); font-size: 14px; }
 
         .waitlist-card {
-            background: #fff;
-            border: 2px solid #ccc;
+            background: var(--surface-color);
+            border: 1px solid var(--border-light);
             padding: 20px;
             display: flex;
             gap: 20px;
@@ -38,13 +38,13 @@
             justify-content: center;
         }
         .waitlist-card-content { flex-grow: 1; }
-        .waitlist-card-name { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 6px; }
-        .waitlist-card-meta { font-size: 13px; color: #666; margin-bottom: 10px; }
-        .waitlist-card-date { font-size: 12px; color: #999; margin-bottom: 12px; }
+        .waitlist-card-name { font-size: 18px; font-weight: bold; color: var(--text-main); margin-bottom: 6px; }
+        .waitlist-card-meta { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+        .waitlist-card-date { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
         .waitlist-card-actions { display: flex; gap: 10px; }
         .btn-cancel-waitlist {
             padding: 8px 16px;
-            background: #fff;
+            background: var(--surface-color);
             color: #e74c3c;
             border: 2px solid #e74c3c;
             cursor: pointer;
@@ -52,7 +52,7 @@
             font-size: 13px;
         }
         .btn-cancel-waitlist:hover { background: #fee2e2; }
-        .empty-state { text-align: center; padding: 50px 20px; border: 2px dashed #ccc; background: #fff; color: #666; }
+        .empty-state { text-align: center; padding: 50px 20px; border: 2px dashed #ccc; background: var(--surface-color); color: var(--text-muted); }
     </style>
 </head>
 <body>
@@ -91,7 +91,7 @@
         </div>
 
         <div id="waitlist-list" style="display: flex; flex-direction: column; gap: 15px;">
-            <div style="text-align:center; padding: 40px; color: #666;">⏳ 正在載入候補清單...</div>
+            <div style="text-align:center; padding: 40px; color: var(--text-muted);">⏳ 正在載入候補清單...</div>
         </div>
     </main>
 </div>

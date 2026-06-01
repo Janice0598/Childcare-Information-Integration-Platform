@@ -7,25 +7,25 @@
     <link rel="stylesheet" href="style.css" />
     <style>
       .user-layout { display: flex; max-width: 1200px; margin: 40px auto; gap: 30px; padding: 0 20px; }
-      .user-sidebar { width: 250px; background-color: #fff; border: 2px solid #ccc; height: fit-content; }
+      .user-sidebar { width: 250px; background-color: var(--surface-color); border: 1px solid var(--border-light); height: fit-content; }
       .user-profile-summary { padding: 20px; text-align: center; border-bottom: 2px solid #eee; }
-      .avatar-placeholder { width: 80px; height: 80px; background-color: #ccc; border-radius: 50%; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; color: #666; }
+      .avatar-placeholder { width: 80px; height: 80px; background-color: #ccc; border-radius: 50%; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
       .user-menu { list-style: none; padding: 0; margin: 0; }
-      .user-menu li { border-bottom: 1px solid #eee; }
-      .user-menu a { display: block; padding: 15px 20px; text-decoration: none; color: #333; font-weight: bold; }
-      .user-menu a:hover, .user-menu a.active { background-color: #eaeaea; border-left: 4px solid #666; }
+      .user-menu li { border-bottom: 1px solid var(--border-light); }
+      .user-menu a { display: block; padding: 15px 20px; text-decoration: none; color: var(--text-main); font-weight: bold; }
+      .user-menu a:hover, .user-menu a.active { background-color: #F2EFEB; border-left: 4px solid #666; }
       .user-main { flex-grow: 1; }
-      .welcome-header { margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid #ccc; }
-      .text-line { color: #666; font-size: 14px; }
-      .profile-section { background: #fff; border: 2px solid #ccc; padding: 25px; margin-bottom: 30px; }
-      .profile-section h3 { margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+      .welcome-header { margin-bottom: 30px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
+      .text-line { color: var(--text-muted); font-size: 14px; }
+      .profile-section { background: var(--surface-color); border: 1px solid var(--border-light); padding: 25px; margin-bottom: 30px; }
+      .profile-section h3 { margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border-light); padding-bottom: 8px; }
       .form-group { margin-bottom: 20px; }
-      .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
-      .form-group input { width: 100%; padding: 10px; border: 2px solid #ccc; font-size: 16px; }
-      .form-group input:focus { outline: none; border-color: #666; }
+      .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--text-main); }
+      .form-group input { width: 100%; padding: 10px; border: 1px solid var(--border-light); font-size: 16px; }
+      .form-group input:focus { outline: none; border-color: var(--text-muted); }
       /* ✅ 修正：email 輸入框在格式錯誤時顯示紅框 */
       .form-group input.input-error { border-color: #e74c3c !important; }
-      .btn-save { background-color: #666; color: white; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+      .btn-save { background-color: var(--text-muted); color: white; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
       .btn-save:disabled { background-color: #aaa; cursor: not-allowed; opacity: 0.5; }
       .message { margin-top: 20px; padding: 10px; border-radius: 4px; font-size: 14px; }
       .message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
