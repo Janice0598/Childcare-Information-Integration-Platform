@@ -17,8 +17,9 @@
       .info-label { color: var(--text-muted); white-space: nowrap; }
       .info-value { font-weight: bold; text-align: right; }
       .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-      .photo-item { height: 150px; background: #eaeaea; border: 1px dashed #999; display: flex; align-items: center; justify-content: center; color: var(--text-muted); overflow: hidden; }
-      .photo-item img { width: 100%; height: 100%; object-fit: cover; }
+      .photo-item { height: 180px; background: #eaeaea; border: 1px solid var(--border-light); border-radius: var(--border-radius, 8px); display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); overflow: hidden; }
+      .photo-caption { width: 100%; padding: 6px; font-size: 14px; font-weight: bold; color: var(--text-main); background: #f8fafc; text-align: center; border-bottom: 1px solid var(--border-light); z-index: 1; }
+      .photo-item img { width: 100%; flex: 1; min-height: 0; object-fit: cover; }
       .staff-table { width: 100%; border-collapse: collapse; font-size: 14px; }
       .staff-table th, .staff-table td { padding: 10px; border-bottom: 1px solid var(--border-light); text-align: left; }
       .staff-table th { background: #f9f9f9; color: var(--text-muted); }
@@ -358,7 +359,7 @@
           const photos = result.data;
           document.getElementById("photo-grid").innerHTML =
             photos && photos.length > 0
-              ? photos.map(p => `<div class="photo-item"><img src="${p.url}" alt="${escapeHtml(p.caption) || "設施照片"}"></div>`).join("")
+              ? photos.map(p => `<div class="photo-item"><div class="photo-caption">${escapeHtml(p.caption) || "設施照片"}</div><img src="${p.url}" alt="${escapeHtml(p.caption) || "設施照片"}"></div>`).join("")
               : '<div class="photo-item" style="grid-column:1/-1;">尚無設施照片</div>';
         } catch (e) {
           document.getElementById("photo-grid").innerHTML = '<div class="photo-item" style="grid-column:1/-1;">照片載入失敗</div>';

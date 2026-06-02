@@ -120,10 +120,15 @@ function renderFavoriteCard(center, favItemId) {
 
   listContainer.innerHTML += `
     <div class="result-card" id="fav-card-${center.center_id}">
-      <div class="card-image" style="overflow:hidden;">
+      <div class="card-image" style="overflow:hidden; position:relative;">
         <img id="thumb-${center.center_id}" src="" alt="機構圖片"
           style="width:100%;height:100%;object-fit:cover;display:none;">
         <span id="thumb-placeholder-${center.center_id}">機構圖片</span>
+        <div id="thumb-caption-${center.center_id}"
+          style="display:none; position:absolute; bottom:0; left:0; right:0;
+                 background:rgba(0,0,0,0.5); color:#fff; font-size:12px;
+                 padding:4px 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+        </div>
       </div>
       <div class="card-content">
         <div class="card-header">
@@ -171,6 +176,15 @@ function renderFavoriteCard(center, favItemId) {
         img.style.display = "block";
       }
       if (placeholder) placeholder.style.display = "none";
+
+      // 顯示照片說明
+      const caption = document.getElementById(
+        `thumb-caption-${center.center_id}`
+      );
+      if (caption) {
+        caption.innerText = firstPhoto.caption || "";
+        caption.style.display = firstPhoto.caption ? "block" : "none";
+      }
     })
     .catch(() => {});
 }
